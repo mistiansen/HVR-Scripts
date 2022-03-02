@@ -1,0 +1,208 @@
+<script>
+    var formatter = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
+    });
+
+    function addUnit(address, unit) {
+        if (typeof unit != "undefined" && unit.length > 0) {
+            let addressTokens = address.split(',');
+            let street = addressTokens[0];
+            street = street + " " + unit;
+            addressTokens.shift();
+            let addressEnding = addressTokens.join(',');
+            address = street + ',' + addressEnding;
+        }
+        console.log('Formed address ' + address + ' from address and unit');
+        return address;
+    }
+
+    function parseResult(result, setCondo) {
+        try {
+            let estimatedValue = result.EstimatedValue;
+            let estimatedMinValue = result.EstimatedMinValue;
+            let estimatedMaxValue = result.EstimatedMaxValue;
+            let confidenceScore = result.ConfidenceScore;
+            let storiesCount = result.StoriesCount;
+            let bedroomsCount = result.BedroomsCount;
+            let bathroomsCount = result.BathroomsCount;
+            let areaBuilding = result.AreaBuilding;
+            let areaLotAcres = result.AreaLotAcres;
+            let yearBuilt = result.YearBuilt;
+            let pool = result.Pool;
+            let poolArea = result.PoolArea;
+            let propertyUseCode = result.PropertyUseCode;
+            let isCondo = result.IsCondo;
+
+            console.log('Got estimate of ' + estimatedValue);
+            console.log('Got bedrooms ' + bedroomsCount);
+            console.log('Got baths ' + bathroomsCount);
+            console.log('Got year built ' + yearBuilt);
+            console.log('Got pool ' + pool);
+            console.log('Got property use code' + propertyUseCode);
+            console.log('This is a condo: ' + isCondo);
+
+            if ((typeof isCondo === "undefined") && (estimatedValue === "$0" || estimatedValue === "$NaN" || typeof estimatedValue === "undefined")) {
+                console.log('Got this for isCondo ' + isCondo);
+                throw 'Unable to pull property info';
+            } else {
+
+                // COULD TURN THIS INTO A LOOPING FUNCTION (LOOP THROUGH IDs)
+                let selectBeds = document.getElementById('select-beds');
+                selectBeds.value = bedroomsCount;
+                selectBeds.dispatchEvent(new Event('change'));
+
+                let selectBaths = document.getElementById('select-baths');
+                selectBaths.value = bathroomsCount;
+                selectBaths.dispatchEvent(new Event('change'));
+
+                let selectStories = document.getElementById('select-stories');
+                selectStories.value = storiesCount;
+                selectStories.dispatchEvent(new Event('change'));
+
+                let selectYear = document.getElementById('select-year-built');
+                selectYear.value = yearBuilt;
+                selectYear.dispatchEvent(new Event('change'));
+
+                let selectPool = document.getElementById('select-pool');
+                if (pool != "Not Provided" && pool != "Unknown") {
+                    console.log('Should be setting pool to Yes');
+                    selectPool.value = 'Yes';
+                } else {
+                    selectPool.value = 'No';
+                }
+                selectPool.dispatchEvent(new Event('change'));
+
+                console.log('Got isCondo ' + isCondo + ' from pullPropertyInfo');
+                if (setCondo && (isCondo == "True" || isCondo == "true" || isCondo)) {
+                    console.log('Is a condo, so should be asking for unit');
+                    document.getElementById('is-condo').setAttribute('is-condo', 'true');
+                    $("#relationship-page").hide();
+                    $("#market-analysis-loader").hide();
+                    $("#condo-unit-page").show();
+                    $("#relationship-back-btn-div").show();
+                    $("#stories-select-div").hide();
+                } else {
+                    console.log('IN THE ELSE?');
+                }
+
+                if (estimatedValue === "$0" || estimatedValue === "$NaN" || typeof estimatedValue === "undefined") {
+                    throw 'Unable to pull value estimate';
+                } else {
+                    let offerEstimate = estimatedValue - (estimatedValue * 0.02);
+                    document.getElementById("offer-estimate").innerHTML = formatter.format(offerEstimate);
+                    document.getElementById("estimate").innerHTML = formatter.format(estimatedValue);
+                    document.getElementById("estimate-min").innerHTML = formatter.format(estimatedMinValue);
+                    document.getElementById("estimate-max").innerHTML = formatter.format(estimatedMaxValue);
+                    document.getElementById("confidence-score").innerHTML = confidenceScore;
+
+                    $("#offer-estimate-send").attr("value", formatter.format(offerEstimate));
+                    $("#value-estimate-send").attr("value", formatter.format(estimatedValue));
+                    $("#value-estimate-min-send").attr("value", formatter.format(estimatedMinValue));
+                    $("#value-estimate-max-send").attr("value", formatter.format(estimatedMaxValue));
+                    $("#confidence-score-send").attr("value", confidenceScore);
+
+                    console.log('Got value of !!' + document.getElementById("offer-estimate-send").value);
+                }
+            }
+        } catch (error) {
+            console.log(error);
+            document.getElementById("offer-header").innerHTML = "We were unable to pull your value report";
+            document.getElementById("offer-estimate").innerHTML = "$-";
+            document.getElementById("estimate").innerHTML = "$-";
+            document.getElementById("estimate-min").innerHTML = "$-";
+            document.getElementById("estimate-max").innerHTML = "$-";
+            document.getElementById("confidence-score").innerHTML = "0";
+            document.getElementById("offer-explanation").style.display = "none";
+            document.getElementById("schedule-walkthrough").style.display = "none";
+        }
+    }
+
+    function pullPropertyInfo(url, address, setCondo) {
+        let requestUrl = url + address;
+        $.ajax({
+            url: requestUrl,
+            method: 'GET',
+        }).done(function (result) {
+            return parseResult(result, setCondo);
+        }).fail(function (err) {
+            console.log('Unabled to pull home value estimate');
+            console.log(err);
+        });
+    }
+
+    let queryString = window.location.search;
+    let params = new URLSearchParams(queryString);
+    let address = params.get("address"); // is the number 123
+    console.log('Pulled address from queryString: ' + address);
+
+    let addressDisplay = document.getElementById("address-display");
+    let addressDisplay2 = document.getElementById("address-display-2");
+    addressDisplay.innerHTML = address;
+    addressDisplay2.innerHTML = address;
+    $("#address-send").attr("value", address); // potentially move down to unit submit section and send "unitAddress"
+
+    $(document).ready(function () {
+        let apiUrl = "https://y9lns0og13.execute-api.us-east-1.amazonaws.com/prod/value/";
+        pullPropertyInfo(apiUrl, address, true);
+    });
+
+    document.getElementById("relationship-back-btn").addEventListener('click', (event) => {
+        let addressDisplay = document.getElementById("address-display");
+        let addressDisplay2 = document.getElementById("address-display-2");
+        addressDisplay.innerHTML = address;
+        addressDisplay2.innerHTML = address;
+        document.getElementById("unit").value = "";
+    });
+
+    document.getElementById("no-unit-btn").addEventListener('click', (event) => {
+        pullPropertyInfo(apiUrl, address, false);
+    });
+
+    document.getElementById("unit-submit-btn").addEventListener('click', (event) => {
+        let unit = document.getElementById("unit-input").value.trim();
+        $("#unit-send").attr("value", unit);
+        document.getElementById("unit").value = unit;
+
+        let unitAddress = addUnit(address, unit);
+        document.getElementById("address-display").innerHTML = unitAddress;
+        document.getElementById("address-display-2").innerHTML = unitAddress;
+
+        // PULL PROPERTY DETAILS
+        pullPropertyInfo(apiUrl, unitAddress, false);
+    });   
+</script>
+
+
+
+<script type="text/javascript">
+    document.getElementById("contact-show-report-btn").onclick = function () {
+        let fullName = document.getElementById("name-input").value.trim();
+        let phone = document.getElementById("phone-input").value.trim();
+        console.log('Here phone length ' + phone.length);
+        if (typeof fullName == "undefined" || fullName.length <= 3 || typeof phone == "undefined" || phone.length < 10) {
+            console.log('Invalid input');
+            return;
+        }
+        $("#property-info-page").hide();
+        $("#success-loader").show();
+        setTimeout(function () { $("#success-loader").hide(); }, 2500);
+        $("#success-page").show();
+    };
+</script>
+
+<script data-info="hacks-body">
+    document.addEventListener("DOMContentLoaded", function () {
+        //Version 1 output = "Sat, Dec 25, 2019"
+        const dateVersion1 = {
+            weekday: "short",
+            year: "numeric",
+            month: "short",
+            day: "2-digit"
+        }
+
+        // Update the text content of our text elements with the formatted date 
+        document.querySelector('.hack22-date-version1').textContent = new Date().toLocaleDateString('en-US', dateVersion1);
+    });
+</script>
