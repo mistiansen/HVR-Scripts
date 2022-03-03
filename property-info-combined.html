@@ -144,10 +144,9 @@
     let address = params.get("address"); // is the number 123
     console.log('Pulled address from queryString: ' + address);
 
-    let addressDisplay = document.getElementById("address-display");
-    let addressDisplay2 = document.getElementById("address-display-2");
-    addressDisplay.innerHTML = address;
-    addressDisplay2.innerHTML = address;
+    $("#address-display").html(address);
+    $("#address-display-2").html(address);
+    $("#address-display-3").html(address); // maybe do a class selector instead
     $("#address-send").attr("value", address); // for the form submission(s); potentially move down to unit submit section and send "unitAddress"
 
     $(document).ready(function () {
@@ -157,10 +156,9 @@
     });
 
     document.getElementById("relationship-back-btn").addEventListener('click', (event) => {
-        let addressDisplay = document.getElementById("address-display");
-        let addressDisplay2 = document.getElementById("address-display-2");
-        addressDisplay.innerHTML = address;
-        addressDisplay2.innerHTML = address;
+        $("#address-display").html(address);
+        $("#address-display-2").html(address);
+        $("#address-display-3").html(address); // maybe do a class selector instead        
         document.getElementById("unit").value = "";
     });
 
@@ -175,8 +173,9 @@
         document.getElementById("unit").value = unit;
 
         let unitAddress = addUnit(address, unit);
-        document.getElementById("address-display").innerHTML = unitAddress;
-        document.getElementById("address-display-2").innerHTML = unitAddress;
+        $("#address-display").html(unitAddress);
+        $("#address-display-2").html(unitAddress);
+        $("#address-display-3").html(unitAddress); // maybe do a class selector instead                
 
         // PULL PROPERTY DETAILS
         let apiUrl = "https://y9lns0og13.execute-api.us-east-1.amazonaws.com/prod/value/";
