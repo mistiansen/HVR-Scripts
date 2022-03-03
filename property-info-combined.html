@@ -1,4 +1,16 @@
 <script>
+    function setSessionId() {
+        let sessionId = '_' + Math.random().toString(36).substr(2, 12);
+        console.log('Generated sessionId ' + sessionId);
+        $("#session-id-send-1").attr("value", sessionId);
+        $("#session-id-send-2").attr("value", sessionId);
+        $("#session-id-send-3").attr("value", sessionId);
+        $("#session-id-send-4").attr("value", sessionId);
+        $("#session-id-send-5").attr("value", sessionId); // get with $("#session-id-send-5").val();
+        $("#session-id-div").attr("value", sessionId);
+        return sessionId;
+    }
+
     var formatter = new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',
@@ -37,8 +49,6 @@
 
             console.log('Got estimate of ' + estimatedValue);
             console.log('Got bedrooms ' + bedroomsCount);
-            console.log('Got baths ' + bathroomsCount);
-            console.log('Got year built ' + yearBuilt);
             console.log('Got pool ' + pool);
             console.log('Got property use code' + propertyUseCode);
             console.log('This is a condo: ' + isCondo);
@@ -83,39 +93,36 @@
                     $("#condo-unit-page").show();
                     $("#relationship-back-btn-div").show();
                     $("#stories-select-div").hide();
-                } else {
-                    console.log('IN THE ELSE?');
                 }
 
                 if (estimatedValue === "$0" || estimatedValue === "$NaN" || typeof estimatedValue === "undefined") {
                     throw 'Unable to pull value estimate';
                 } else {
                     let offerEstimate = estimatedValue - (estimatedValue * 0.02);
-                    document.getElementById("offer-estimate").innerHTML = formatter.format(offerEstimate);
-                    document.getElementById("estimate").innerHTML = formatter.format(estimatedValue);
-                    document.getElementById("estimate-min").innerHTML = formatter.format(estimatedMinValue);
-                    document.getElementById("estimate-max").innerHTML = formatter.format(estimatedMaxValue);
-                    document.getElementById("confidence-score").innerHTML = confidenceScore;
+                    $("#offer-estimate").html(formatter.format(offerEstimate));
+                    $("#estimate").html(formatter.format(estimatedValue));
+                    $("#estimate-min").html(formatter.format(estimatedMinValue));
+                    $("#estimate-max").html(formatter.format(estimatedMaxValue));
+                    $("#confidence-score").html(confidenceScore);
 
+                    // SET FORM SUBMISSION VALUES (do we need to set for error? I think leaving empty is fine.)
                     $("#offer-estimate-send").attr("value", formatter.format(offerEstimate));
                     $("#value-estimate-send").attr("value", formatter.format(estimatedValue));
                     $("#value-estimate-min-send").attr("value", formatter.format(estimatedMinValue));
                     $("#value-estimate-max-send").attr("value", formatter.format(estimatedMaxValue));
                     $("#confidence-score-send").attr("value", confidenceScore);
-
-                    console.log('Got value of !!' + document.getElementById("offer-estimate-send").value);
                 }
             }
         } catch (error) {
             console.log(error);
-            document.getElementById("offer-header").innerHTML = "We were unable to pull your value report";
-            document.getElementById("offer-estimate").innerHTML = "$-";
-            document.getElementById("estimate").innerHTML = "$-";
-            document.getElementById("estimate-min").innerHTML = "$-";
-            document.getElementById("estimate-max").innerHTML = "$-";
-            document.getElementById("confidence-score").innerHTML = "0";
-            document.getElementById("offer-explanation").style.display = "none";
-            document.getElementById("schedule-walkthrough").style.display = "none";
+            $("#offer-header").html("We were unable to pull your value report");
+            $("#offer-estimate").html("$-");
+            $("#estimate").html("$-");
+            $("#estimate-min").html("$-");
+            $("#estimate-max").html("$-");
+            $("#confidence-score").html(0);
+            $("#offer-explanation").hide();
+            $("#schedule-walkthrough").hide();
         }
     }
 
@@ -141,9 +148,10 @@
     let addressDisplay2 = document.getElementById("address-display-2");
     addressDisplay.innerHTML = address;
     addressDisplay2.innerHTML = address;
-    $("#address-send").attr("value", address); // potentially move down to unit submit section and send "unitAddress"
+    $("#address-send").attr("value", address); // for the form submission(s); potentially move down to unit submit section and send "unitAddress"
 
     $(document).ready(function () {
+        setSessionId(); // identifies the client across all forms
         let apiUrl = "https://y9lns0og13.execute-api.us-east-1.amazonaws.com/prod/value/";
         pullPropertyInfo(apiUrl, address, true);
     });
@@ -157,6 +165,7 @@
     });
 
     document.getElementById("no-unit-btn").addEventListener('click', (event) => {
+        let apiUrl = "https://y9lns0og13.execute-api.us-east-1.amazonaws.com/prod/value/";
         pullPropertyInfo(apiUrl, address, false);
     });
 
@@ -170,6 +179,7 @@
         document.getElementById("address-display-2").innerHTML = unitAddress;
 
         // PULL PROPERTY DETAILS
+        let apiUrl = "https://y9lns0og13.execute-api.us-east-1.amazonaws.com/prod/value/";
         pullPropertyInfo(apiUrl, unitAddress, false);
     });   
 </script>
@@ -194,15 +204,12 @@
 
 <script data-info="hacks-body">
     document.addEventListener("DOMContentLoaded", function () {
-        //Version 1 output = "Sat, Dec 25, 2019"
         const dateVersion1 = {
             weekday: "short",
             year: "numeric",
             month: "short",
             day: "2-digit"
         }
-
-        // Update the text content of our text elements with the formatted date 
         document.querySelector('.hack22-date-version1').textContent = new Date().toLocaleDateString('en-US', dateVersion1);
     });
 </script>
