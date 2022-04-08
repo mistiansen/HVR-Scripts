@@ -1,12 +1,8 @@
 <script>
-    function setSessionId() {
-        let sessionId = '_' + Math.random().toString(36).substr(2, 12);
-        console.log('Generated sessionId ' + sessionId);
-        $("#session-id-send-1").attr("value", sessionId);
-        $("#session-id-send-2").attr("value", sessionId);
-        $("#session-id-send-3").attr("value", sessionId);
-        $("#session-id-send-4").attr("value", sessionId);
-        $("#session-id-send-5").attr("value", sessionId); // get with $("#session-id-send-5").val();
+    function setSessionId(sessionId) {
+        // let sessionId = '_' + Math.random().toString(36).substr(2, 12);
+        console.log('Storing sessionId ' + sessionId);
+        $(".session-id").attr("value", sessionId); // get with $("#session-id-send-5").val();
         $("#session-id-div").attr("value", sessionId);
         return sessionId;
     }
@@ -14,6 +10,7 @@
     var formatter = new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',
+        minimumFractionDigits: 0,
         maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
     });
 
@@ -42,14 +39,14 @@
             let areaBuilding = result.AreaBuilding;
             let areaLotAcres = result.AreaLotAcres;
             let yearBuilt = result.YearBuilt;
-            let pool = result.Pool;
-            let poolArea = result.PoolArea;
+            // let pool = result.Pool;
+            // let poolArea = result.PoolArea;
             let propertyUseCode = result.PropertyUseCode;
             let isCondo = result.IsCondo;
 
             console.log('Got estimate of ' + estimatedValue);
             console.log('Got bedrooms ' + bedroomsCount);
-            console.log('Got pool ' + pool);
+            console.log('Got baths ' + bathroomsCount);
             console.log('Got property use code' + propertyUseCode);
             console.log('This is a condo: ' + isCondo);
 
@@ -59,68 +56,107 @@
             } else {
 
                 // COULD TURN THIS INTO A LOOPING FUNCTION (LOOP THROUGH IDs)
-                let selectBeds = document.getElementById('select-beds');
-                selectBeds.value = bedroomsCount;
-                selectBeds.dispatchEvent(new Event('change'));
+                // let selectBeds = document.getElementById('select-beds');
+                // selectBeds.value = bedroomsCount;
+                // selectBeds.dispatchEvent(new Event('change'));
 
-                let selectBaths = document.getElementById('select-baths');
-                selectBaths.value = bathroomsCount;
-                selectBaths.dispatchEvent(new Event('change'));
+                // let selectBaths = document.getElementById('select-baths');
+                // selectBaths.value = bathroomsCount;
+                // selectBaths.dispatchEvent(new Event('change'));
 
-                let selectStories = document.getElementById('select-stories');
-                selectStories.value = storiesCount;
-                selectStories.dispatchEvent(new Event('change'));
+                // let selectStories = document.getElementById('select-stories');
+                // selectStories.value = storiesCount;
+                // selectStories.dispatchEvent(new Event('change'));
 
-                let selectYear = document.getElementById('select-year-built');
-                selectYear.value = yearBuilt;
-                selectYear.dispatchEvent(new Event('change'));
+                // let selectYear = document.getElementById('select-year-built');
+                // selectYear.value = yearBuilt;
+                // selectYear.dispatchEvent(new Event('change'));
 
-                let selectPool = document.getElementById('select-pool');
-                if (pool != "Not Provided" && pool != "Unknown") {
-                    console.log('Should be setting pool to Yes');
-                    selectPool.value = 'Yes';
-                } else {
-                    selectPool.value = 'No';
-                }
-                selectPool.dispatchEvent(new Event('change'));
+                // let selectPool = document.getElementById('select-pool');
+                // if (pool != "Not Provided" && pool != "Unknown") {
+                //     console.log('Should be setting pool to Yes');
+                //     selectPool.value = 'Yes';
+                // } else {
+                //     selectPool.value = 'No';
+                // }
+                // selectPool.dispatchEvent(new Event('change'));
 
                 console.log('Got isCondo ' + isCondo + ' from pullPropertyInfo');
                 if (setCondo && (isCondo == "True" || isCondo == "true" || isCondo)) {
                     console.log('Is a condo, so should be asking for unit');
                     document.getElementById('is-condo').setAttribute('is-condo', 'true');
-                    $("#relationship-page").hide();
+                    // $("#relationship-page").hide();
                     $("#market-analysis-loader").hide();
                     $("#condo-unit-page").show();
-                    $("#relationship-back-btn-div").show();
-                    $("#stories-select-div").hide();
+                    $("#home-details-page").hide();
+                    // $("#relationship-back-btn-div").show();
+                    // $("#stories-select-div").hide();
                 }
 
                 if (estimatedValue === "$0" || estimatedValue === "$NaN" || typeof estimatedValue === "undefined") {
                     throw 'Unable to pull value estimate';
                 } else {
-                    let offerEstimate = estimatedValue - (estimatedValue * 0.02);
-                    $("#offer-estimate").html(formatter.format(offerEstimate));
-                    $("#estimate").html(formatter.format(estimatedValue));
-                    $("#estimate-min").html(formatter.format(estimatedMinValue));
-                    $("#estimate-max").html(formatter.format(estimatedMaxValue));
-                    $("#confidence-score").html(confidenceScore);
+                    // let offerEstimate = estimatedValue - (estimatedValue * 0.02);
+                    // $(".offer-estimate").html(formatter.format(offerEstimate));
+                    // $(".offer-estimate").val(formatter.format(offerEstimate));
 
-                    // SET FORM SUBMISSION VALUES (do we need to set for error? I think leaving empty is fine.)
-                    $("#offer-estimate-send").attr("value", formatter.format(offerEstimate));
-                    $("#value-estimate-send").attr("value", formatter.format(estimatedValue));
-                    $("#value-estimate-min-send").attr("value", formatter.format(estimatedMinValue));
-                    $("#value-estimate-max-send").attr("value", formatter.format(estimatedMaxValue));
-                    $("#confidence-score-send").attr("value", confidenceScore);
+                    let adjustmentPercent = 0.0;
+                    try {
+                        let decimal1 = document.getElementById("decimal1").value.trim();
+                        let decimal2 = document.getElementById("decimal2").value.trim();
+                        console.log('Got decimal1: ' + decimal1);
+                        console.log('Got decimal2: ' + decimal2);
+                        let adjustmentPercentText = decimal1 + '.' + decimal2;
+                        adjustmentPercent = parseFloat(adjustmentPercentText);
+                    } catch (error) {
+                        console.log(error);
+                        console.log('Failed to pull adjustmentPercent; using 0.0');
+                        adjustmentPercent = 0.0;
+                    }
+
+                    if (typeof adjustmentPercent == "undefined" || isNaN(adjustmentPercent)) {
+                        console.log('Undefined adjustmentPercent; using 0');
+                        adjustmentPercent = 0.0;
+                    }
+
+                    console.log('Using adjustmentPercent: ' + adjustmentPercent);
+
+                    let incrementAmount = estimatedValue * (adjustmentPercent / 100);
+                    console.log('Incrementing ' + estimatedValue + ' by: ' + incrementAmount);
+
+                    let adjustedEstimate = +estimatedValue + +incrementAmount; // increment value up or down; unary operator or else it seems to think it's string
+                    // let adjustedEstimate = parseInt(estimatedValue) + parseInt(incrementAmount); // increment value up or down
+                    // let adjustedEstimate = parseInt(estimatedValue) + (estimatedValue * (adjustmentPercent / 100)); // increment value up or down
+                    console.log('Got adjustedEstimate: ' + adjustedEstimate);
+
+                    $(".selling-estimate").html(formatter.format(adjustedEstimate));
+                    $(".selling-estimate").val(formatter.format(adjustedEstimate));
+                    $(".value-estimate").html(formatter.format(estimatedValue));
+                    $(".value-estimate").val(formatter.format(estimatedValue));
+
+                    $(".value-estimate-min").html(formatter.format(estimatedMinValue));
+                    $(".value-estimate-min").val(formatter.format(estimatedMinValue));
+
+                    $(".value-estimate-max").html(formatter.format(estimatedMaxValue));
+                    $(".value-estimate-max").val(formatter.format(estimatedMaxValue));
+
+                    $(".confidence-score").html(confidenceScore);
+                    $(".confidence-score").val(confidenceScore);
                 }
             }
         } catch (error) {
             console.log(error);
-            $("#offer-header").html("We were unable to pull your value report");
-            $("#offer-estimate").html("$-");
-            $("#estimate").html("$-");
-            $("#estimate-min").html("$-");
-            $("#estimate-max").html("$-");
-            $("#confidence-score").html(0);
+            $(".offer-header").html("We were unable to pull your value report");
+            // $(".offer-estimate").html("$-");
+            // $(".offer-estimate").val("$-");
+            $(".value-estimate").html("$-");
+            $(".value-estimate-min").html("$-");
+            $(".value-estimate-max").html("$-");
+            $(".confidence-score").html(0);
+            $(".value-estimate").val("$-");
+            $(".value-estimate-min").val("$-");
+            $(".value-estimate-max").val("$-");
+            $(".confidence-score").val(0);
             $("#offer-explanation").hide();
             $("#schedule-walkthrough").hide();
         }
@@ -142,29 +178,36 @@
     let queryString = window.location.search;
     let params = new URLSearchParams(queryString);
     let address = params.get("address"); // is the number 123
+    let sessionId = params.get("session"); // added 3/23/2022
     console.log('Pulled address from queryString: ' + address);
+    console.log('Pulled sessionId from queryString: ' + sessionId);
 
-    $("#address-display").html(address);
-    $("#address-display-2").html(address);
-    $("#address-display-3").html(address); // maybe do a class selector instead
+    $(".address-display").html(address);
     $("#address-send").attr("value", address); // for the form submission(s); potentially move down to unit submit section and send "unitAddress"
 
     $(document).ready(function () {
-        setSessionId(); // identifies the client across all forms
+        // $("#market-analysis-loader").show();
+        if (typeof sessionId == "undefined") {
+            sessionId = '_' + Math.random().toString(36).substr(2, 12);
+            console.log('No sessionId carried over, so generating here: ' + sessionId);
+        }
+        setSessionId(sessionId); // identifies the client across all forms
         let apiUrl = "https://y9lns0og13.execute-api.us-east-1.amazonaws.com/prod/value/";
         pullPropertyInfo(apiUrl, address, true);
+        setTimeout(function () { $("#market-analysis-loader").hide(); }, 2000);
     });
 
-    document.getElementById("relationship-back-btn").addEventListener('click', (event) => {
-        $("#address-display").html(address);
-        $("#address-display-2").html(address);
-        $("#address-display-3").html(address); // maybe do a class selector instead        
-        document.getElementById("unit").value = "";
-    });
+    // document.getElementById("relationship-back-btn").addEventListener('click', (event) => {
+    //     $(".address-display").html(address);
+    //     document.getElementById("unit").value = "";
+    // });
 
     document.getElementById("no-unit-btn").addEventListener('click', (event) => {
         let apiUrl = "https://y9lns0og13.execute-api.us-east-1.amazonaws.com/prod/value/";
-        pullPropertyInfo(apiUrl, address, false);
+        pullPropertyInfo(apiUrl, address, false); // don't set condo (false), because already did on first pull
+        // setTimeout(function () { $("#market-analysis-loader").hide(); }, 2000); // maybe use a different loader
+        $("#condo-unit-page").hide();
+        $("#home-details-page").show();
     });
 
     document.getElementById("unit-submit-btn").addEventListener('click', (event) => {
@@ -173,13 +216,14 @@
         document.getElementById("unit").value = unit;
 
         let unitAddress = addUnit(address, unit);
-        $("#address-display").html(unitAddress);
-        $("#address-display-2").html(unitAddress);
-        $("#address-display-3").html(unitAddress); // maybe do a class selector instead                
+        $(".address-display").html(unitAddress);
 
         // PULL PROPERTY DETAILS
         let apiUrl = "https://y9lns0og13.execute-api.us-east-1.amazonaws.com/prod/value/";
-        pullPropertyInfo(apiUrl, unitAddress, false);
+        pullPropertyInfo(apiUrl, unitAddress, false); // don't set condo (false), because already did on first pull
+        // setTimeout(function () { $("#market-analysis-loader").hide(); }, 2000); // maybe use a different loader
+        $("#condo-unit-page").hide();
+        $("#home-details-page").show();
     });   
 </script>
 
@@ -199,16 +243,4 @@
         setTimeout(function () { $("#success-loader").hide(); }, 2500);
         $("#success-page").show();
     };
-</script>
-
-<script data-info="hacks-body">
-    document.addEventListener("DOMContentLoaded", function () {
-        const dateVersion1 = {
-            weekday: "short",
-            year: "numeric",
-            month: "short",
-            day: "2-digit"
-        }
-        document.querySelector('.hack22-date-version1').textContent = new Date().toLocaleDateString('en-US', dateVersion1);
-    });
 </script>
