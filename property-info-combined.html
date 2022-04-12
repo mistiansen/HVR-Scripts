@@ -1,9 +1,7 @@
 <script>
     function setSessionId(sessionId) {
-        // let sessionId = '_' + Math.random().toString(36).substr(2, 12);
         console.log('Storing sessionId ' + sessionId);
-        $(".session-id").attr("value", sessionId); // get with $("#session-id-send-5").val();
-        $("#session-id-div").attr("value", sessionId);
+        $(".session-id").attr("value", sessionId); // get with $("#session-id-storage").val();
         return sessionId;
     }
 
@@ -124,6 +122,13 @@
                     let incrementAmount = estimatedValue * (adjustmentPercent / 100);
                     console.log('Incrementing ' + estimatedValue + ' by: ' + incrementAmount);
 
+                    if (incrementAmount > 0) {
+                        $(".value-increment").html(formatter.format(incrementAmount)); // this is the one that actually displays it
+                        $(".value-increment").val(formatter.format(incrementAmount)); // necessary if want to submit somewhere?
+                    } else {
+                        $(".over-market-explanation").hide(); // hide estimate over market value if no increment amount
+                    }
+
                     let adjustedEstimate = +estimatedValue + +incrementAmount; // increment value up or down; unary operator or else it seems to think it's string
                     // let adjustedEstimate = parseInt(estimatedValue) + parseInt(incrementAmount); // increment value up or down
                     // let adjustedEstimate = parseInt(estimatedValue) + (estimatedValue * (adjustmentPercent / 100)); // increment value up or down
@@ -224,23 +229,88 @@
         // setTimeout(function () { $("#market-analysis-loader").hide(); }, 2000); // maybe use a different loader
         $("#condo-unit-page").hide();
         $("#home-details-page").show();
-    });   
+    });
+
 </script>
 
 
 
 <script type="text/javascript">
-    document.getElementById("contact-show-report-btn").onclick = function () {
-        let fullName = document.getElementById("name-input").value.trim();
-        let phone = document.getElementById("phone-input").value.trim();
-        console.log('Here phone length ' + phone.length);
-        if (typeof fullName == "undefined" || fullName.length <= 3 || typeof phone == "undefined" || phone.length < 10) {
-            console.log('Invalid input');
-            return;
+    // document.getElementById("contact-show-report-btn").onclick = function () {
+    //     let fullName = document.getElementById("name-input").value.trim();
+    //     let phone = document.getElementById("phone-input").value.trim();
+    //     console.log('Here phone length ' + phone.length);
+    //     if (typeof fullName == "undefined" || fullName.length <= 3 || typeof phone == "undefined" || phone.length < 10) {
+    //         console.log('Invalid input');
+    //         return;
+    //     }
+    //     $("#property-info-page").hide();
+    //     $("#success-loader").show();
+    //     setTimeout(function () { $("#success-loader").hide(); }, 2500);
+    //     $("#success-page").show();
+    // };
+
+    document.querySelectorAll('.show-report').forEach(item => {
+        item.addEventListener('click', event => {
+            $("#property-info-page").hide();
+            $("#success-page").show();
+            // $("#success-loader").show();
+            setTimeout(function () { $("#success-loader").hide(); }, 3000);
+            $(".value-div").show();
+        })
+    });
+</script>
+
+<script type="text/javascript">
+
+    function checkSellerDetails(name) {
+        let checkedRadio = document.querySelector('input[name="' + name + '"]:checked');
+
+        let checkedValue;
+        if (checkedRadio != null) {
+            checkedValue = checkedRadio.value
+        } else {
+            checkedValue = "None given";
         }
-        $("#property-info-page").hide();
-        $("#success-loader").show();
-        setTimeout(function () { $("#success-loader").hide(); }, 2500);
-        $("#success-page").show();
-    };
+        return checkedValue;
+    }
+
+    function submitSellerDetails() {
+        let sessionId = $("#session-id-storage").val();
+        console.log('Got sessionId from div before submit: ' + sessionId);
+        let checkRadioNames = ["Relationship-to-Home", "Considering-Selling"];
+        let sellingDetails = {
+            "sessionId": sessionId,
+        }
+        for (const checkRadioName of checkRadioNames) {
+            console.log('Checking radio selections for ' + checkRadioName);
+            let sellerDetails = checkSellerDetails(checkRadioName);
+            sellingDetails[checkRadioName] = sellerDetails;
+        }
+
+        console.log('Sending these selling details: ' + sellingDetails);
+        console.log('Sending this sessionId: ' + sellingDetails['sessionId']);
+        console.log('Sending this considering-selling: ' + sellingDetails['Considering-Selling']);
+        // now submit the seller map
+        let request = $.ajax({
+            url: "https://hooks.zapier.com/hooks/catch/9670660/b8nnpdu/silent/",
+            method: "POST",
+            data: sellingDetails,
+        });
+
+        request.done(function (data) {
+            console.log("SUCCESS: " + data);
+        });
+
+        request.fail(function () {
+            console.log("Request failed");
+        });
+    }
+
+    const sellingRadioButtons = document.querySelectorAll('input[name="Considering-Selling"]');
+    for (const sellingRadioButton of sellingRadioButtons) {
+        sellingRadioButton.addEventListener('change', function (e) {
+            submitSellerDetails();
+        });
+    }
 </script>
