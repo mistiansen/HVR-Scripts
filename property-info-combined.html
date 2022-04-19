@@ -16,7 +16,8 @@
         if (typeof unit != "undefined" && unit.length > 0) {
             let addressTokens = address.split(',');
             let street = addressTokens[0];
-            street = street + " " + unit;
+            // street = street + " " + unit;
+            street = street + " Unit " + unit;
             addressTokens.shift();
             let addressEnding = addressTokens.join(',');
             address = street + ',' + addressEnding;
@@ -191,9 +192,13 @@
     $("#address-send").attr("value", address); // for the form submission(s); potentially move down to unit submit section and send "unitAddress"
 
     $(document).ready(function () {
+        // HIDE UNUSED LOADERS
         // $("#market-analysis-loader").show();
+        // $('#updating-home-details-loader').removeClass('hide');
+        $('#updating-home-details-loader').hide();
+
         if (typeof sessionId == "undefined") {
-            sessionId = '_' + Math.random().toString(36).substr(2, 12);
+            sessionId = Math.random().toString(36).substr(2, 12);
             console.log('No sessionId carried over, so generating here: ' + sessionId);
         }
         setSessionId(sessionId); // identifies the client across all forms
@@ -216,19 +221,49 @@
     });
 
     document.getElementById("unit-submit-btn").addEventListener('click', (event) => {
+        // STORE UNIT
         let unit = document.getElementById("unit-input").value.trim();
         $("#unit-send").attr("value", unit);
         document.getElementById("unit").value = unit;
 
+        // UPDATE ADDRESS
         let unitAddress = addUnit(address, unit);
         $(".address-display").html(unitAddress);
+
+        // SHOW LOADER
+        // $('#updating-home-details-loader').css('display', 'flex');
+        // $("#updating-home-details-loader").show();
+        $('#updating-home-details-loader').removeClass('hide');
 
         // PULL PROPERTY DETAILS
         let apiUrl = "https://y9lns0og13.execute-api.us-east-1.amazonaws.com/prod/value/";
         pullPropertyInfo(apiUrl, unitAddress, false); // don't set condo (false), because already did on first pull
-        // setTimeout(function () { $("#market-analysis-loader").hide(); }, 2000); // maybe use a different loader
+
+        // HIDE AND SHOW APPROPRIATE ELEMENTS
+        // setTimeout(function () { $("#updating-home-details-loader").hide(); }, 2000); // maybe use a different loader        
+        setTimeout(function () { $('#updating-home-details-loader').addClass('hide'); }, 2000); // hide home details loader after 2 seconds
         $("#condo-unit-page").hide();
         $("#home-details-page").show();
+
+        // GET HOUSE + STREET + UNIT
+        let unitAddressTokens = unitAddress.split(',');
+        let addressField1 = unitAddressTokens[0];
+
+        // UPDATE AIRTABLE ADDRESS RECORD
+        // let sessionId = $("#session-id-storage").val();
+        let request = $.ajax({
+            url: "https://hooks.zapier.com/hooks/catch/9670660/bz32t4k/silent/",
+            method: "POST",
+            data: { "sessionId": sessionId, "unit": unit, "addressField1": addressField1, "updatedAddress": unitAddress },
+        });
+
+        request.done(function (data) {
+            console.log("update address SUCCESS : " + data);
+        });
+
+        request.fail(function () {
+            console.log("Update address failed");
+        });
     });
 
 </script>
@@ -313,4 +348,17 @@
             submitSellerDetails();
         });
     }
+</script>
+
+
+<script>
+    $(document).ready(function () {
+        $(window).keydown(function (event) {
+            if (event.keyCode == 13) {
+                console.log('Preventing enter button submission');
+                event.preventDefault();
+                return false;
+            }
+        });
+    });   
 </script>
