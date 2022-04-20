@@ -135,6 +135,12 @@
                     // let adjustedEstimate = parseInt(estimatedValue) + (estimatedValue * (adjustmentPercent / 100)); // increment value up or down
                     console.log('Got adjustedEstimate: ' + adjustedEstimate);
 
+                    $(".beds-count").html(bedroomsCount);
+                    $(".beds-count").val(bedroomsCount);
+
+                    $(".baths-count").html(bathroomsCount);
+                    $(".baths-count").val(bathroomsCount);
+
                     $(".selling-estimate").html(formatter.format(adjustedEstimate));
                     $(".selling-estimate").val(formatter.format(adjustedEstimate));
                     $(".value-estimate").html(formatter.format(estimatedValue));
@@ -153,6 +159,13 @@
         } catch (error) {
             console.log(error);
             $(".offer-header").html("We were unable to pull your value report");
+
+            $(".beds-count").html("-");
+            $(".beds-count").val("-");
+
+            $(".baths-count").html("-");
+            $(".baths-count").val("-");
+
             // $(".offer-estimate").html("$-");
             // $(".offer-estimate").val("$-");
             $(".value-estimate").html("$-");
@@ -312,10 +325,26 @@
 
     function submitSellerDetails() {
         let sessionId = $("#session-id-storage").val();
+
+        let bedsSend = $("#beds-storage").val();
+        let bathsSend = $("#baths-storage").val();
+        let estimateMinSend = $("#value-estimate-min-storage").val();
+        let estimateSend = $("#value-estimate-storage").val();
+        let estimateMaxSend = $("#value-estimate-max-storage").val();
+        let confidenceSend = $("#confidence-score-storage").val();
+
+        console.log('PULLED THIS FROM BATHS SEND: ' + bathsSend);
         console.log('Got sessionId from div before submit: ' + sessionId);
+
         let checkRadioNames = ["Relationship-to-Home", "Considering-Selling"];
         let sellingDetails = {
             "sessionId": sessionId,
+            "beds": bedsSend,
+            "baths": bathsSend,
+            "value-estimate-min": estimateMinSend,
+            "value-estimate": estimateSend,
+            "value-estimate-max": estimateMaxSend,
+            "confidence-score": confidenceSend,
         }
         for (const checkRadioName of checkRadioNames) {
             console.log('Checking radio selections for ' + checkRadioName);
