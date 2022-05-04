@@ -194,17 +194,29 @@
         });
     }
 
-    let queryString = window.location.search;
-    let params = new URLSearchParams(queryString);
-    let address = params.get("address"); // is the number 123
-    let sessionId = params.get("session"); // added 3/23/2022
-    console.log('Pulled address from queryString: ' + address);
-    console.log('Pulled sessionId from queryString: ' + sessionId);
+    // let queryString = window.location.search;
+    // let params = new URLSearchParams(queryString);
+    // let address = params.get("address"); // is the number 123
+    // let sessionId = params.get("session"); // added 3/23/2022
+    // console.log('Pulled address from queryString: ' + address);
+    // console.log('Pulled sessionId from queryString: ' + sessionId);
 
-    $(".address-display").html(address);
-    $("#address-send").attr("value", address); // for the form submission(s); potentially move down to unit submit section and send "unitAddress"
+    // $(".address-display").html(address);
+    // $("#address-send").attr("value", address); // for the form submission(s); potentially move down to unit submit section and send "unitAddress"
 
     $(document).ready(function () {
+
+        // 4/27/2022 - MOVED HERE FROM ABOVE - why wasn't it always here?
+        let queryString = window.location.search;
+        let params = new URLSearchParams(queryString);
+        let address = params.get("address"); // is the number 123
+        let sessionId = params.get("session"); // added 3/23/2022
+        console.log('Pulled address from queryString: ' + address);
+        console.log('Pulled sessionId from queryString: ' + sessionId);
+
+        $(".address-display").html(address);
+        $("#address-send").attr("value", address); // for the form submission(s); potentially move down to unit submit section and send "unitAddress"
+
         // HIDE UNUSED LOADERS
         // $("#market-analysis-loader").show();
         // $('#updating-home-details-loader').removeClass('hide');
@@ -330,6 +342,7 @@
         let bathsSend = $("#baths-storage").val();
         let estimateMinSend = $("#value-estimate-min-storage").val();
         let estimateSend = $("#value-estimate-storage").val();
+        let adjustedEstimateSend = $("#selling-estimate-storage").val();
         let estimateMaxSend = $("#value-estimate-max-storage").val();
         let confidenceSend = $("#confidence-score-storage").val();
 
@@ -343,6 +356,7 @@
             "baths": bathsSend,
             "value-estimate-min": estimateMinSend,
             "value-estimate": estimateSend,
+            "selling-estimate": adjustedEstimateSend, // different than value-estimate if agent provided adjustment percentage 
             "value-estimate-max": estimateMaxSend,
             "confidence-score": confidenceSend,
         }
@@ -357,7 +371,7 @@
         console.log('Sending this considering-selling: ' + sellingDetails['Considering-Selling']);
         // now submit the seller map
         let request = $.ajax({
-            url: "https://hooks.zapier.com/hooks/catch/9670660/b8nnpdu/silent/",
+            url: "https://hooks.zapier.com/hooks/catch/9670660/b8nnpdu/silent/", // change to API gateway endpoint
             method: "POST",
             data: sellingDetails,
         });
