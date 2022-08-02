@@ -1,0 +1,427 @@
+<script>
+    function setSessionId(sessionId) {
+        console.log('Storing sessionId ' + sessionId);
+        $(".session-id").attr("value", sessionId); // get with $("#session-id-storage").val();
+        return sessionId;
+    }
+
+    var formatter = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
+    });
+
+    function addUnit(address, unit) {
+        if (typeof unit != "undefined" && unit.length > 0) {
+            let addressTokens = address.split(',');
+            let street = addressTokens[0];
+            // street = street + " " + unit;
+            street = street + " Unit " + unit;
+            addressTokens.shift();
+            let addressEnding = addressTokens.join(',');
+            address = street + ',' + addressEnding;
+        }
+        console.log('Formed address ' + address + ' from address and unit');
+        return address;
+    }
+
+    function parseResult(result, setCondo) {
+        try {
+            let estimatedValue = result.EstimatedValue;
+            let estimatedMinValue = result.EstimatedMinValue;
+            let estimatedMaxValue = result.EstimatedMaxValue;
+            let confidenceScore = result.ConfidenceScore;
+            // let propertyUseCode = result.PropertyUseCode;
+            let isCondo = result.IsCondo;
+
+            console.log('Got estimate of ' + estimatedValue);
+            // console.log('Got property use code' + propertyUseCode);
+            console.log('This is a condo: ' + isCondo);
+
+            if ((typeof isCondo === "undefined") && (estimatedValue === "$0" || estimatedValue === "$NaN" || typeof estimatedValue === "undefined")) {
+                console.log('Got this for isCondo ' + isCondo);
+                throw 'Unable to pull property info';
+            } else {
+                console.log('Got isCondo ' + isCondo + ' from pullPropertyInfo');
+                if (setCondo && (isCondo == "True" || isCondo == "true" || isCondo)) {
+                    console.log('Is a condo, so should be asking for unit');
+                    document.getElementById('is-condo').setAttribute('is-condo', 'true');
+                    // $("#relationship-page").hide();
+                    $("#market-analysis-loader").hide();
+                    $("#home-details-page").hide();
+                    $("#condo-unit-page").show();
+                    // $("#relationship-back-btn-div").show();
+                    // $("#stories-select-div").hide();
+                }
+
+                if (estimatedValue === "$0" || estimatedValue === "$NaN" || typeof estimatedValue === "undefined") {
+                    throw 'Unable to pull value estimate';
+                } else {
+                    // let offerEstimate = estimatedValue - (estimatedValue * 0.02);
+                    // $(".offer-estimate").html(formatter.format(offerEstimate));
+                    // $(".offer-estimate").val(formatter.format(offerEstimate));
+
+                    let adjustmentPercent = 0.0;
+                    try {
+                        let decimal1 = document.getElementById("decimal1").value.trim();
+                        let decimal2 = document.getElementById("decimal2").value.trim();
+                        console.log('Got decimal1: ' + decimal1);
+                        console.log('Got decimal2: ' + decimal2);
+                        let adjustmentPercentText = decimal1 + '.' + decimal2;
+                        adjustmentPercent = parseFloat(adjustmentPercentText);
+                    } catch (error) {
+                        console.log(error);
+                        console.log('Failed to pull adjustmentPercent; using 0.0');
+                        adjustmentPercent = 0.0;
+                    }
+
+                    if (typeof adjustmentPercent == "undefined" || isNaN(adjustmentPercent)) {
+                        console.log('Undefined adjustmentPercent; using 0');
+                        adjustmentPercent = 0.0;
+                    }
+
+                    console.log('Using adjustmentPercent: ' + adjustmentPercent);
+
+                    let incrementAmount = estimatedValue * (adjustmentPercent / 100);
+                    console.log('Incrementing ' + estimatedValue + ' by: ' + incrementAmount);
+
+                    if (incrementAmount > 0) {
+                        $(".value-increment").html(formatter.format(incrementAmount)); // this is the one that actually displays it
+                        $(".value-increment").val(formatter.format(incrementAmount)); // necessary if want to submit somewhere?
+                    } else {
+                        $(".over-market-explanation").hide(); // hide estimate over market value if no increment amount
+                    }
+
+                    let adjustedEstimate = +estimatedValue + +incrementAmount; // increment value up or down; unary operator or else it seems to think it's string
+                    // let adjustedEstimate = parseInt(estimatedValue) + parseInt(incrementAmount); // increment value up or down
+                    // let adjustedEstimate = parseInt(estimatedValue) + (estimatedValue * (adjustmentPercent / 100)); // increment value up or down
+                    console.log('Got adjustedEstimate: ' + adjustedEstimate);
+
+                    $(".selling-estimate").html(formatter.format(adjustedEstimate));
+                    $(".selling-estimate").val(formatter.format(adjustedEstimate));
+                    $(".value-estimate").html(formatter.format(estimatedValue));
+                    $(".value-estimate").val(formatter.format(estimatedValue));
+
+                    $(".value-estimate-min").html(formatter.format(estimatedMinValue));
+                    $(".value-estimate-min").val(formatter.format(estimatedMinValue));
+
+                    $(".value-estimate-max").html(formatter.format(estimatedMaxValue));
+                    $(".value-estimate-max").val(formatter.format(estimatedMaxValue));
+
+                    $(".confidence-score").html(confidenceScore);
+                    $(".confidence-score").val(confidenceScore);
+                }
+            }
+        } catch (error) {
+            console.log(error);
+            $(".offer-header").html("We were unable to pull your value report");
+
+            // $(".offer-estimate").html("$-");
+            // $(".offer-estimate").val("$-");
+            $(".value-estimate").html("$-");
+            $(".value-estimate-min").html("$-");
+            $(".value-estimate-max").html("$-");
+            $(".confidence-score").html(0);
+            $(".value-estimate").val("$-");
+            $(".value-estimate-min").val("$-");
+            $(".value-estimate-max").val("$-");
+            $(".confidence-score").val(0);
+            $("#offer-explanation").hide();
+            $("#schedule-walkthrough").hide();
+        }
+    }
+
+    function pullPropertyInfo(url, address, setCondo) {
+        // let requestUrl = url + address;
+        // console.log('Running pullPropertyInfo with URL: ' + requestUrl);
+        // $.ajax({
+        //     url: requestUrl,
+        //     method: 'GET',
+        // }).done(function (result) {
+        //     return parseResult(result, setCondo);
+        // }).fail(function (err) {
+        //     console.log('Unabled to pull home value estimate');
+        //     console.log(err);
+        // });
+        $.ajax({
+            url: url,
+            method: 'POST',
+            data: JSON.stringify({ "address": address }), // data: JSON.stringify(sellingDetails),
+        }).done(function (result) {
+            return parseResult(result, setCondo);
+        }).fail(function (err) {
+            console.log('Unabled to pull home value estimate');
+            console.log(err);
+        });
+    }
+
+    $(document).ready(function () {
+
+        let pathTokens = location.pathname.split('/');
+        let agentId = pathTokens[pathTokens.length - 1];
+        $("#agent-id-storage").attr("value", agentId); // get with $("#session-id-storage").val();
+        console.log(agentId);
+
+        // 4/27/2022 - MOVED HERE FROM ABOVE - why wasn't it always here?
+        let queryString = window.location.search;
+        let params = new URLSearchParams(queryString);
+        let address = params.get("address");
+        let sessionId = params.get("session"); // added 3/23/2022
+        // let source = params.get("source"); // added 5/25/2022
+        let domain = params.get("domain"); // added 5/25/2022
+        console.log('Pulled address from queryString: ' + address);
+        console.log('Pulled sessionId from queryString: ' + sessionId);
+        console.log('Pulled source domain from queryString: ' + domain);
+
+        $(".address-display").html(address);
+        $("#address-send").attr("value", address); // for the form submission(s); potentially move down to unit submit section and send "unitAddress"
+        $("#address-storage").attr("value", address); // get with $("#session-id-storage").val();
+
+        // STORE THE SOURCE USER CAME FROM
+        // $("#source-storage").attr("value", source); // get with $("#source-storage").val();
+        $("#domain-storage").attr("value", domain); // get with $("#domain-storage").val();
+
+        // HIDE UNUSED LOADERS
+        // $("#market-analysis-loader").show();
+        // $('#updating-home-details-loader').removeClass('hide');
+        $('#updating-home-details-loader').hide();
+
+        if (typeof sessionId == "undefined") {
+            sessionId = Math.random().toString(36).substr(2, 12);
+            console.log('No sessionId carried over, so generating here: ' + sessionId);
+        }
+        setSessionId(sessionId); // identifies the client across all forms
+        // let apiUrl = "https://y9lns0og13.execute-api.us-east-1.amazonaws.com/prod/value/";
+        let apiUrl = "https://dgdsx8kk3b.execute-api.us-east-1.amazonaws.com/dev/property";
+        pullPropertyInfo(apiUrl, address, true);
+        setTimeout(function () { $("#market-analysis-loader").hide(); }, 2000);
+    });
+
+    // document.getElementById("relationship-back-btn").addEventListener('click', (event) => {
+    //     $(".address-display").html(address);
+    //     document.getElementById("unit").value = "";
+    // });
+
+    document.getElementById("no-unit-btn").addEventListener('click', (event) => {
+        console.log('Just clicked no unit btn');
+        // let apiUrl = "https://y9lns0og13.execute-api.us-east-1.amazonaws.com/prod/value/";
+        let apiUrl = "https://dgdsx8kk3b.execute-api.us-east-1.amazonaws.com/dev/property";
+        pullPropertyInfo(apiUrl, address, false); // don't set condo (false), because already did on first pull
+        // setTimeout(function () { $("#market-analysis-loader").hide(); }, 2000); // maybe use a different loader
+        console.log('Did we make it here?');
+        $("#condo-unit-page").hide();
+        $("#home-details-page").show();
+    });
+
+    document.getElementById("unit-submit-btn").addEventListener('click', (event) => {
+        console.log('Clicked the button!!!');
+
+        // STORE UNIT
+        let unit = document.getElementById("unit-input").value.trim();
+        console.log('Found unit: ' + unit);
+        $("#unit-send").attr("value", unit);
+        document.getElementById("unit").value = unit;
+
+        // UPDATE ADDRESS
+        console.log('About to add unit: ' + unit);
+        let address = $("#address-storage").val();
+        console.log('Adding to address from storage: ' + address);
+
+        let unitAddress = addUnit(address, unit);
+        console.log('Running with unitAddress: ' + unitAddress);
+        $("#address-storage").attr("value", unitAddress); // get with $("#session-id-storage").val();
+        $(".address-display").html(unitAddress);
+
+        // SHOW LOADER
+        // $('#updating-home-details-loader').css('display', 'flex');
+        // $("#updating-home-details-loader").show();
+        $('#updating-home-details-loader').removeClass('hide');
+
+        // PULL PROPERTY DETAILS
+        // let apiUrl = "https://y9lns0og13.execute-api.us-east-1.amazonaws.com/prod/value/";
+        let apiUrl = "https://dgdsx8kk3b.execute-api.us-east-1.amazonaws.com/dev/property";
+        pullPropertyInfo(apiUrl, unitAddress, false); // don't set condo (false), because already did on first pull
+
+        // HIDE AND SHOW APPROPRIATE ELEMENTS
+        // setTimeout(function () { $("#updating-home-details-loader").hide(); }, 2000); // maybe use a different loader        
+        setTimeout(function () { $('#updating-home-details-loader').addClass('hide'); }, 2000); // hide home details loader after 2 seconds
+        $("#condo-unit-page").hide();
+        $("#home-details-page").show();
+    });
+
+</script>
+
+
+
+<script type="text/javascript">
+    // document.getElementById("contact-show-report-btn").onclick = function () {
+    //     let fullName = document.getElementById("name-input").value.trim();
+    //     let phone = document.getElementById("phone-input").value.trim();
+    //     console.log('Here phone length ' + phone.length);
+    //     if (typeof fullName == "undefined" || fullName.length <= 3 || typeof phone == "undefined" || phone.length < 10) {
+    //         console.log('Invalid input');
+    //         return;
+    //     }
+    //     $("#property-info-page").hide();
+    //     $("#success-loader").show();
+    //     setTimeout(function () { $("#success-loader").hide(); }, 2500);
+    //     $("#success-page").show();
+    // };
+
+    document.querySelectorAll('.show-report').forEach(item => {
+        item.addEventListener('click', event => {
+            $("#property-info-page").hide();
+            $("#success-page").show();
+            $('#success-loader').css('display', 'flex'); // replacing typical "$("#success-loader").show();" ; alternative may be to always show it with 'flex' in webflow then just do the .hide() step below
+            setTimeout(function () { $("#success-loader").hide(); }, 3000);
+            $(".value-div").show();
+        })
+    });
+</script>
+
+<script type="text/javascript">
+
+    function checkSellerDetails(name) {
+        let checkedRadio = document.querySelector('input[name="' + name + '"]:checked');
+
+        let checkedValue;
+        if (checkedRadio != null) {
+            checkedValue = checkedRadio.value
+        } else {
+            checkedValue = "None given";
+        }
+        return checkedValue;
+    }
+
+    function submitSellerDetails() {
+        let agentId = $("#agent-id-storage").val();
+        let sessionId = $("#session-id-storage").val();
+        // let source = $("#source-storage").val();
+        let domain = $("#domain-storage").val();
+
+        let addressSend = $("#address-storage").val();
+        $("#address-appointment").attr("value", addressSend); // for the form submission(s); potentially move down to unit submit section and send "unitAddress"
+        $("#address-virtual-appointment").attr("value", addressSend); // for the form submission(s); potentially move down to unit submit section and send "unitAddress"
+
+        let estimateMinSend = $("#value-estimate-min-storage").val();
+        let estimateSend = $("#value-estimate-storage").val();
+        let adjustedEstimateSend = $("#selling-estimate-storage").val();
+        let estimateMaxSend = $("#value-estimate-max-storage").val();
+        let confidenceSend = $("#confidence-score-storage").val();
+
+        let submittedName;
+        try {
+            submittedName = $("#First-Name").val();
+            if (submittedName.length <= 1) {
+                submittedName = '-';
+            }
+        } catch (error) {
+            console.log(error);
+            submittedName = ' ';
+        }
+
+        let submittedNumber;
+        try {
+            submittedNumber = $("#phone-input").val();
+            if (submittedNumber.length <= 5) {
+                submittedNumber = '-';
+            }
+        } catch (error) {
+            console.log(error);
+            submittedNumber = ' ';
+        }
+
+        console.log('Got sessionId from div before submit: ' + sessionId);
+        console.log('Got agentId from div before submit: ' + agentId);
+        console.log('Got domain from div before submit: ' + domain);
+
+        // CONVENTION that we're now following is...
+        // our variables are first letter caps separated with "-"
+        // Mel is all first letter caps with no sepator
+        // batch is camelCase
+        // the only exceptions are in the keys (agentId, sessionId)
+        let sellingDetails = {
+            "agentId": agentId,
+            "sessionId": sessionId,
+            // "source": source,
+            "domain": domain,
+            "Submitted-Address": addressSend, // "Submitted Address": addressSend,
+            "Submitted-Name": submittedName,
+            "Submitted-Number": submittedNumber,
+            "value_Displayed-Selling-Estimate": adjustedEstimateSend, // different than value-estimate if agent provided adjustment percentage 
+            "value_Displayed-Value": estimateSend,
+            "value_Displayed-MinValue": estimateMinSend,
+            "value_Displayed-MaxValue": estimateMaxSend,
+            "value_Displayed-ConfidenceScore": confidenceSend,
+            // "value_Displayed-Batch": true,
+            // "value_Displayed-Mel": true,
+            "property_search": true,
+            "skiptrace": true,
+            "finished": true,
+        }
+
+        let checkRadioNames = ["Relationship-to-Home", "Considering-Selling"];
+        for (const checkRadioName of checkRadioNames) {
+            console.log('Checking radio selections for ' + checkRadioName);
+            let sellerDetails = checkSellerDetails(checkRadioName);
+            sellingDetails[checkRadioName] = sellerDetails;
+        }
+
+        console.log('Sending these selling details: ' + sellingDetails);
+        console.log('Sending this sessionId: ' + sellingDetails['sessionId']);
+        console.log('Sending this considering-selling: ' + sellingDetails['Considering-Selling']);
+        // now submit the seller map
+        let request = $.ajax({
+            url: "https://dgdsx8kk3b.execute-api.us-east-1.amazonaws.com/dev/session", // change to API gateway endpoint
+            method: "POST",
+            data: JSON.stringify(sellingDetails),
+        });
+
+        request.done(function (data) {
+            console.log("SUCCESS: " + data);
+        });
+
+        request.fail(function () {
+            console.log("Request failed");
+        });
+
+        // request.fail(function (xhr, status, error) {
+        //     console.log("Request failed");
+        //     console.log(status);
+        //     console.log(xhr);
+        //     console.log(xhr.responseText);
+        //     console.log(error);
+        // });        
+    }
+
+    // // DO THIS IS IF WANT TO SUBMIT ON SELLING TIMEFRAME QUESTIONS
+    // const sellingRadioButtons = document.querySelectorAll('input[name="Considering-Selling"]');
+    // for (const sellingRadioButton of sellingRadioButtons) {
+    //     sellingRadioButton.addEventListener('change', function (e) {
+    //         submitSellerDetails();
+    //     });
+    // }
+
+    // DO THIS IS IF WANT TO SUBMIT ON SHOW REPORT
+    const showReportButtons = document.querySelectorAll('.show-report');
+    for (const showReportButton of showReportButtons) {
+        showReportButton.addEventListener('click', function handleClick(event) {
+            console.log('Submitting details to show report...');
+            submitSellerDetails();
+        });
+    }    
+</script>
+
+
+<script>
+    $(document).ready(function () {
+        $(window).keydown(function (event) {
+            if (event.keyCode == 13) {
+                console.log('Preventing enter button submission');
+                event.preventDefault();
+                return false;
+            }
+        });
+    });   
+</script>
