@@ -287,7 +287,6 @@
 
     function mobileCheck() {
         let isMobile = false;
-        // if (window.matchMedia("(max-width: 767px)").matches) {
         if ((window.matchMedia("(max-width: 767px)").matches) && (!!('ontouchstart' in window))) {
             isMobile = true;
         }
@@ -295,14 +294,14 @@
     };
 
     function handleBounce() {
-        let finished = $("#finished").val(); // only has a value set if report page is reached
-        if (!finished) {
+        let finished = $("#finished").val(); // has a value if already bounced or reached report
+        if (!finished) { // if no value has been set
             let sessionInfo = getCurrentSessionInfo();
             sessionInfo["finished"] = false;
             sessionInfo["bounced"] = true;
-            console.log("The user left before finishing");
             sessionInfo = JSON.stringify(sessionInfo);
             navigator.sendBeacon(backendPath + "/session", sessionInfo);                    
+            $("#finished").attr("value", "no"); // technically "bounced", but just needs any value so we don't re-notify
         }        
     }
 
@@ -325,7 +324,7 @@
 <script type="text/javascript">
     document.querySelectorAll('.show-report').forEach(item => {
         item.addEventListener('click', event => {
-            $("#visitor-info-page").hide(); // I think this element did not previously have an ID; also was previously doing $("#property-info-page").hide();
+            $("#visitor-info-page").hide();
             $("#success-page").show();
             $('#success-loader').css('display', 'flex'); // replacing typical "$("#success-loader").show();" ; alternative may be to always show it with 'flex' in webflow then just do the .hide() step below
             setTimeout(function () { $("#success-loader").hide(); }, 3000);
