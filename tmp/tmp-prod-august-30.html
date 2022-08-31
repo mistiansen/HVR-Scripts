@@ -31,6 +31,11 @@
         if (typeof place.formatted_address != "undefined") {
             console.log(place.formatted_address);
             document.getElementById(addressInput).value = place.formatted_address;
+            // if (document.getElementById(addressInput).value !== "") {
+            //     document.getElementById(addressInput).disabled = false;
+            //     $('#submit-address-btn').attr("data-disabled", false);
+            //     $('#address-warning').hide();
+            // }
         }
     }
 
@@ -52,14 +57,11 @@
 
 
 <script>
-    let backendPath = "https://hhvjdbhqp4.execute-api.us-east-1.amazonaws.com/prod";
-    // let backendPath = "https://1snwvce58a.execute-api.us-east-1.amazonaws.com/dev";
-
     var formatter = new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',
         minimumFractionDigits: 0,
-        maximumFractionDigits: 0, // (2500.99 printed as $2,501)
+        maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
     });
 
     function addUnit(address, unit) {
@@ -117,25 +119,12 @@
     }
 
     function pullPropertyInfo(address, agentId, domain) {
-        /* Consider adding sessionId here either as a parameter or pulling it from the storage div
-            - If supplied with a sessionId, the backend would simply use and return that rather than overwriting the existing
-            - Currently, each pullPropertyInfo request returns a new sessionId
-        */
-       let propertyRequest = { "address": address, "agentId": agentId, "site": domain };
-
-       // ADDED 8/22/22 - Use existing sessionId if it exists
-       let sessionId = $("#session-id-storage").val();
-       console.log('Pulled this existing sessionId from session-id-storage before requesting property info: ' + sessionId);
-       if (typeof sessionId != "undefined" && sessionId.length > 0) {
-        propertyRequest['sessionId'] = sessionId;
-       }
-
         console.log('Pulling property info for ' + address);
-        let url = backendPath + "/property";
+        let url = "https://hhvjdbhqp4.execute-api.us-east-1.amazonaws.com/prod/property";
         $.ajax({
             url: url,
             method: 'POST',
-            data: JSON.stringify(propertyRequest),        
+            data: JSON.stringify({ "address": address, "agentId": agentId, "site": domain }), // data: JSON.stringify(sellingDetails),
         }).done(function (result) {
             let property = result.Property;
             let sessionId = result.sessionId; // this becomes the sessionId that tracks subsequent changes
@@ -149,9 +138,23 @@
         });
     }
 
+    function storeAddressElements(addressMap) {
+        let addressDisplayText = addressMap.addressTextModified; // was "addressMap.addressLine1Modified + '<br>' + addressMap.addressLine2Modified;"
+        $(".address-display").html(addressDisplayText);
+        $("#address-send").attr("value", addressMap.addressTextModified); // for the form submission(s); potentially move down to unit submit section and send "unitAddress"
+        $("#address-storage").attr("value", addressMap.addressTextModified); // house number, street, and unit (if any)
+
+        $("#street-storage").attr("value", addressMap.street); // house number, street, and unit (if any)
+        $("#unit-storage").attr("value", addressMap.unit); // should be included above in street, I think
+        $("#unit-type-storage").attr("value", addressMap.unitType); // sub-premises type
+        $("#city-storage").attr("value", addressMap.city); // get with $("#city-storage").val()
+        $("#state-storage").attr("value", addressMap.state);
+        $("#zip-storage").attr("value", addressMap.zip);
+    }
+
     function validateAddress(address) {
         console.log('About to validate address: ' + address);
-        let url = backendPath + "/address";
+        let url = "https://hhvjdbhqp4.execute-api.us-east-1.amazonaws.com/prod/address";
         $.ajax({
             url: url,
             method: 'POST',
@@ -166,25 +169,19 @@
             try {
                 if (!result.invalidAddress) {
                     console.log('Looks like it was a valid address');
+                    let validatedAddress = result.address;
+                    // let validatedAddressDisplay = result.addressLine1Modified + '<br>' + result.addressLine2Modified;
+                    let validatedAddressDisplay = result.addressLine1Modified;
+                    updateAddressComponents(validatedAddress, validatedAddressDisplay);
+                    storeAddressElements(result);
 
-                    // PARSE AND STORE VALIDATED ADDRESS COMPONENTS         
-                    let addressDisplayText = result.addressTextModified; // was "result.addressLine1Modified + '<br>' + result.addressLine2Modified;"
-                    $(".address-display").html(addressDisplayText); // was "result.addressLine1Modified + '<br>' + result.addressLine2Modified;"
-                    $("#address-send").attr("value", addressDisplayText); // for the form submission(s); potentially move down to unit submit section and send "unitAddress"
-                    $("#address-storage").attr("value", addressDisplayText); // house number, street, and unit (if any)
-
-                    $("#street-storage").attr("value", result.street); 
-                    $("#unit-storage").attr("value", result.unit); // should be included above in street, I think
-                    $("#unit-type-storage").attr("value", result.unitType); // sub-premises type
-                    $("#city-storage").attr("value", result.city); 
-                    $("#state-storage").attr("value", result.state);
-                    $("#zip-storage").attr("value", result.zip);                    
-                    
-                    // REQUEST PROPERTY INFO FROM BACKEND
+                    // 6/27/2022 - NEW SECTION MOVED HERE
+                    let address = $("#address-storage").val(); // we really need the above storeAddressElements to have finished; TODO - make sure that finishes first
                     let agentId = $("#agent-id-storage").val();
                     let site = $("#domain-storage").val();
-                    pullPropertyInfo(addressDisplayText, agentId, site); // alternatively, we could do this in the address valdation endpoint
+                    pullPropertyInfo(address, agentId, site); // alternatively, we do this in the address valdation endpoint
                     console.log('Finished pulling property info after address validation');
+                    // END NEW SECTION
 
                     $("#condo-unit-page").hide(); // may have never gotten here, but it would be shoowing if thought was a condo initially
                     $("#invalid-address-page").hide(); // for good measure(?)
@@ -215,6 +212,12 @@
         });
     }
 
+    function updateAddressComponents(address, displayAddress) {
+        $(".address-display").html(displayAddress);
+        $("#address-send").attr("value", address); // for the form submission(s); potentially move down to unit submit section and send "unitAddress"
+        $("#address-storage").attr("value", address); // get with $("#session-id-storage").val();
+    }
+
     $(document).ready(function () {
         // 4/27/2022 - MOVED HERE FROM ABOVE - why wasn't it always here?
         let queryString = window.location.search;
@@ -232,9 +235,7 @@
         console.log('Pulled agent from queryString: ' + agentId);
 
         // UPDATE ADDRESS DISPLAY AND STORAGE FIELDS
-        $(".address-display").html(address);
-        $("#address-send").attr("value", address); // NOTE - consider removing
-        $("#address-storage").attr("value", address); // NOTE - consider removing
+        updateAddressComponents(address, address);
 
         // STORE THE SOURCE USER CAME FROM
         $("#domain-storage").attr("value", site); // get with $("#domain-storage").val();
@@ -248,8 +249,23 @@
         setTimeout(function () { $("#market-analysis-loader").hide(); }, 2500);
     });
 
+    // document.getElementById("relationship-back-btn").addEventListener('click', (event) => {
+    //     $(".address-display").html(address);
+    //     document.getElementById("unit").value = "";
+    // });
+
+    // document.getElementById("submit-address-correction-btn").addEventListener('click', (event) => {
+    //     console.log('Clicked address correction button');
+    //     let newAddress = document.getElementById("address-correction-input").value.trim();
+    //     console.log('Here is the new address ' + newAddress);
+
+    //     validateAddress(newAddress);
+    //     setTimeout(function () { $("#market-analysis-loader").hide(); }, 2000);
+    // });
+
     document.getElementById("no-unit-btn").addEventListener('click', (event) => {
         console.log('Just clicked no unit btn');
+        // setTimeout(function () { $("#market-analysis-loader").hide(); }, 2000); // maybe use a different loader
         console.log('Progressing without re-validating the no-unit address');
         $("#condo-unit-page").hide();
     });
@@ -258,6 +274,8 @@
         // STORE UNIT
         let unit = document.getElementById("unit-input").value.trim();
         console.log('User entered unit: ' + unit);
+        // $("#unit-send").attr("value", unit);
+        // document.getElementById("unit").value = unit;
 
         // UPDATE ADDRESS
         console.log('Adding unit to address : ' + unit);
@@ -265,59 +283,18 @@
         console.log('Adding to address from storage: ' + address);
 
         let unitAddress = addUnit(address, unit);
+        // $("#address-storage").attr("value", unitAddress); // get with $("#session-id-storage").val();
+        // $(".address-display").html(unitAddress);
 
         // SHOW LOADER
+        // $('#updating-home-details-loader').css('display', 'flex');
+        // $("#updating-home-details-loader").show();
         $('#updating-home-details-loader').removeClass('hide');
 
         // VALIDATE ADDRESS
         validateAddress(unitAddress); // don't set condo (false), because already did on first pull
-    });   
+    });
 
-    window.onbeforeunload = function() {  
-        let finished = $("#finished").val();
-        console.log("finished? " + finished);
-        let warningMessage = null;
-        if (!finished) {
-            console.log('Setting warning');
-            warningMessage = 'Are you sure you want to leave?';
-        }        
-        console.log(warningMessage);
-        return warningMessage;
-    };   
-
-    function mobileCheck() {
-        let isMobile = false;
-        // if (window.matchMedia("(max-width: 767px)").matches) {
-        if ((window.matchMedia("(max-width: 767px)").matches) && (!!('ontouchstart' in window))) {
-            isMobile = true;
-        }
-        return isMobile;
-    };
-
-    function handleBounce() {
-        let finished = $("#finished").val(); // only has a value set if report page is reached
-        if (!finished) {
-            let sessionInfo = getCurrentSessionInfo();
-            sessionInfo["finished"] = false;
-            sessionInfo["bounced"] = true;
-            console.log("The user left before finishing");
-            sessionInfo = JSON.stringify(sessionInfo);
-            navigator.sendBeacon(backendPath + "/session", sessionInfo);                    
-        }        
-    }
-
-    window.onunload = function() {  
-        handleBounce();
-    };   
-    
-    document.onvisibilitychange = function() {
-        console.log('Visibility change');
-        let mobileDevice = mobileCheck();
-        console.log('Mobile: ' + mobileDevice);
-        if ((mobileDevice) && (document.visibilityState === 'hidden')) {
-            handleBounce();
-        }
-    };    
 </script>
 
 
@@ -336,32 +313,32 @@
 
 <script type="text/javascript">
 
-    function updateSession(sessionFields) {
-       console.log('Right before updateSession()');
-        let request = $.ajax({
-            url: backendPath + "/session",
-            method: "POST",
-            data: JSON.stringify(sessionFields),
-        });
+    function checkSellerDetails(name) {
+        let checkedRadio = document.querySelector('input[name="' + name + '"]:checked');
 
-        request.done(function (data) {
-            console.log("SUCCESS: " + data);
-        });
-
-        request.fail(function () {
-            console.log("Request failed");
-        });
+        let checkedValue;
+        if (checkedRadio != null) {
+            checkedValue = checkedRadio.value
+        } else {
+            checkedValue = "None given";
+        }
+        return checkedValue;
     }
 
-    function getCurrentSessionInfo() {
-        
+    function submitSellerDetails() {
         let agentId = $("#agent-id-storage").val();
         let sessionId = $("#session-id-storage").val();
         let site = $("#domain-storage").val();
-        console.log('Got sessionId from div before submit: ' + sessionId);
-        console.log('Got agentId from div before submit: ' + agentId);
 
         let addressSend = $("#address-storage").val();
+        $("#address-appointment").attr("value", addressSend); // for the form submission(s); potentially move down to unit submit section and send "unitAddress"
+        $("#address-virtual-appointment").attr("value", addressSend); // for the form submission(s); potentially move down to unit submit section and send "unitAddress"
+
+        let estimateMinSend = $("#value-estimate-min-storage").val();
+        let estimateSend = $("#value-estimate-storage").val();
+        let adjustedEstimateSend = $("#selling-estimate-storage").val();
+        let estimateMaxSend = $("#value-estimate-max-storage").val();
+        let confidenceSend = $("#confidence-score-storage").val();
 
         let submittedName;
         try {
@@ -385,42 +362,47 @@
             submittedNumber = ' ';
         }
 
+        console.log('Got sessionId from div before submit: ' + sessionId);
+        console.log('Got agentId from div before submit: ' + agentId);
+
         // CONVENTION that we're now following is...
         // our variables are first letter caps separated with "-"
         // Mel is all first letter caps with no sepator
         // batch is camelCase
         // the only exceptions are in the keys (agentId, sessionId)
-        let sessionInfo = {
+        let sellingDetails = {
             "sessionId": sessionId,
             "agentId": agentId,
             "site": site,
             "Submitted-Address": addressSend, // "Submitted Address": addressSend,
             "Submitted-Name": submittedName,
             "Submitted-Number": submittedNumber,
+            "finished": true,
         }
 
         let checkRadioNames = ["Relationship-to-Home", "Considering-Selling"];
         for (const checkRadioName of checkRadioNames) {
             console.log('Checking radio selections for ' + checkRadioName);
             let sellerDetails = checkSellerDetails(checkRadioName);
-            sessionInfo[checkRadioName] = sellerDetails;
+            sellingDetails[checkRadioName] = sellerDetails;
         }
-        
-        console.log('Sending this sessionInfo: ' + sessionInfo);
 
-        return sessionInfo;        
-    }
+        console.log('Sending these selling details: ' + sellingDetails);
+        console.log('Sending this sessionId: ' + sellingDetails['sessionId']);
+        console.log('Sending this considering-selling: ' + sellingDetails['Considering-Selling']);
+        let request = $.ajax({
+            url: "https://hhvjdbhqp4.execute-api.us-east-1.amazonaws.com/prod/session",
+            method: "POST",
+            data: JSON.stringify(sellingDetails),
+        });
 
-    function checkSellerDetails(name) {
-        let checkedRadio = document.querySelector('input[name="' + name + '"]:checked');
+        request.done(function (data) {
+            console.log("SUCCESS: " + data);
+        });
 
-        let checkedValue;
-        if (checkedRadio != null) {
-            checkedValue = checkedRadio.value
-        } else {
-            checkedValue = "None given";
-        }
-        return checkedValue;
+        request.fail(function () {
+            console.log("Request failed");
+        });
     }
 
     // DO THIS IS IF WANT TO SUBMIT ON SHOW REPORT
@@ -428,17 +410,7 @@
     for (const showReportButton of showReportButtons) {
         showReportButton.addEventListener('click', function handleClick(event) {
             console.log('Submitting details to show report...');
-
-            // TOOK THE BELOW OUT OF submitSellerDetails()
-            let addressSend = $("#address-storage").val();
-            $("#address-appointment").attr("value", addressSend); // for the form submission(s); potentially move down to unit submit section and send "unitAddress"
-            $("#address-virtual-appointment").attr("value", addressSend); // for the form submission(s); potentially move down to unit submit section and send "unitAddress"
-
-            // Send off session update to backend
-            let sessionInfo = getCurrentSessionInfo();
-            sessionInfo["finished"] = true;
-            $("#finished").attr("value", true);
-            updateSession(sessionInfo);
+            submitSellerDetails();
         });
     }    
 </script>
