@@ -1,16 +1,3 @@
-<script>
-    function resetPage() {
-        $("#updating-home-details-loader").show(); // might need to set a z-index?
-        $("#condo-unit-page").hide();
-        $("#invalid-address-page").hide();
-        $("#relationship-page").hide(); // this would initially show after a valid address entry
-        $("#selling-timeframe-page").hide(); // I think this element did not previously have an ID
-        $("#visitor-details-page").hide(); // I think this element did not previously have an ID
-        $("#phone-entry-page").hide(); // this element should be removed altogether in new version
-
-    }
-</script>
-
 <script type="text/javascript"
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCI7CFal6YrzdiCSWjF-YeX7XeAbYzoerg&libraries=places&callback=initAutocomplete"
     async="" defer="">
@@ -52,8 +39,8 @@
 
 
 <script>
-    // let backendPath = "https://hhvjdbhqp4.execute-api.us-east-1.amazonaws.com/prod";
-    let backendPath = "https://1snwvce58a.execute-api.us-east-1.amazonaws.com/dev";
+    let backendPath = "https://hhvjdbhqp4.execute-api.us-east-1.amazonaws.com/prod";
+    // let backendPath = "https://1snwvce58a.execute-api.us-east-1.amazonaws.com/dev";
 
     var formatter = new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -184,13 +171,16 @@
                     let agentId = $("#agent-id-storage").val();
                     let site = $("#domain-storage").val();
                     pullPropertyInfo(addressDisplayText, agentId, site); // alternatively, we could do this in the address valdation endpoint
-                    console.log('Finished pulling property info after address validation');
 
                     $("#condo-unit-page").hide(); // may have never gotten here, but it would be shoowing if thought was a condo initially
                     $("#invalid-address-page").hide(); // for good measure(?)
                     $("#relationship-page").show();
                 } else if ((result.needUnit && !result.unitProvided) || (result.needUnit && result.invalidUnit)) {
+                    let addressDisplayText = result.addressTextModified;
+                    $(".address-display").html(addressDisplayText); 
+                    $("#address-storage").attr("value", addressDisplayText); 
                     $("#relationship-page").hide();
+                    $("#invalid-address-page").hide(); // this is necessary in case first a nonsense address, then a unit number address
                     $("#condo-unit-page").show();
                 } else {
                     console.log('Invalid address...deciding what to do next');
@@ -233,7 +223,6 @@
 
         // UPDATE ADDRESS DISPLAY AND STORAGE FIELDS
         $(".address-display").html(address);
-        $("#address-send").attr("value", address); // NOTE - consider removing
         $("#address-storage").attr("value", address); // NOTE - consider removing
 
         // STORE THE SOURCE USER CAME FROM
