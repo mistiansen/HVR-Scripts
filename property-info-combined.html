@@ -206,20 +206,30 @@
     }
 
     $(document).ready(function () {
-        // 4/27/2022 - MOVED HERE FROM ABOVE - why wasn't it always here?
         let queryString = window.location.search;
         let params = new URLSearchParams(queryString);
-        let address = params.get("address");
         let site = params.get("site"); // added 5/25/2022
-
-        // IT'S possible that we should query with the source site name here to ensure safety
+        let address = params.get("address");
         let agentId = params.get("agent"); // added 6/27/2022
-        $("#agent-id-storage").attr("value", agentId); // get with $("#agent-id-storage").val();
-        console.log(agentId);
 
         console.log('Pulled address from queryString: ' + address);
         console.log('Pulled source site from queryString: ' + site);
         console.log('Pulled agent from queryString: ' + agentId);
+
+        if (!site || !address || !agentId) {
+            console.log("Referring site or address not provied; routing to main site");
+            let routeTo = "https://my.homevalue.report";
+            // let queryString = '?address=' + encodeURIComponent(address) + '&agent=' + encodeURIComponent(agentId) + '&site=' + encodeURIComponent(site);
+            // routeTo = routeTo + queryString;
+            console.log('Routing to URL ' + routeTo);
+            location.href = routeTo;            
+        }
+
+        // history.replaceState({}, null, "/value");  
+
+        // IT'S possible that we should query with the source site name here to ensure safety
+        $("#agent-id-storage").attr("value", agentId); // get with $("#agent-id-storage").val();
+        console.log(agentId);
 
         // UPDATE ADDRESS DISPLAY AND STORAGE FIELDS
         $(".address-display").html(address);
@@ -343,9 +353,9 @@
 
     function getCurrentSessionInfo() {
         
+        let site = $("#domain-storage").val();
         let agentId = $("#agent-id-storage").val();
         let sessionId = $("#session-id-storage").val();
-        let site = $("#domain-storage").val();
         console.log('Got sessionId from div before submit: ' + sessionId);
         console.log('Got agentId from div before submit: ' + agentId);
 
@@ -379,9 +389,9 @@
         // batch is camelCase
         // the only exceptions are in the keys (agentId, sessionId)
         let sessionInfo = {
+            "site": site,
             "sessionId": sessionId,
             "agentId": agentId,
-            "site": site,
             "Submitted-Address": addressSend, // "Submitted Address": addressSend,
             "Submitted-Name": submittedName,
             "Submitted-Number": submittedNumber,
