@@ -21,7 +21,6 @@
         }
     }
 
-    // document.getElementById("submit-address-correction-btn").addEventListener('click', (event) => {
     $("body").on("click", "#submit-address-correction-btn", async function (e) {
         e.preventDefault(); // prevent webflow defaults
         // $('#submit-address-correction-btn').val("Going...");
@@ -59,6 +58,14 @@
             address = street + ',' + addressEnding;
         }
         console.log('Formed address ' + address + ' from address and unit');
+        return address;
+    }
+
+    function addZipCode(address, zip) {
+        if (typeof zip != "undefined" && zip.length > 0) {
+            address = address + ' ' + zip;
+        }
+        console.log('Formed address ' + address + ' from address and zip');
         return address;
     }
 
@@ -104,10 +111,8 @@
     }
 
     function pullPropertyInfo(address, agentId, domain) {
-        /* Consider adding sessionId here either as a parameter or pulling it from the storage div
-            - If supplied with a sessionId, the backend would simply use and return that rather than overwriting the existing
-            - Currently, each pullPropertyInfo request returns a new sessionId
-        */
+
+        /* Currently, each pullPropertyInfo request returns a new sessionId */
        let propertyRequest = { "address": address, "agentId": agentId, "site": domain };
 
        // ADDED 8/22/22 - Use existing sessionId if it exists
@@ -149,14 +154,14 @@
             console.log('Submitted address ' + result.submittedAddress);
             $('#updating-home-details-loader').hide()
             // $('#updating-home-details-loader').css('display', 'flex');
-            $('#market-analysis-loader').hide(); // should then allow the normal flow to continue; maybe rename to "address-loader"
+            $('#market-analysis-loader').hide(); // maybe rename to "address-loader"
             try {
                 if (!result.invalidAddress) {
                     console.log('Looks like it was a valid address');
 
                     // PARSE AND STORE VALIDATED ADDRESS COMPONENTS         
-                    let addressDisplayText = result.addressTextModified; // was "result.addressLine1Modified + '<br>' + result.addressLine2Modified;"
-                    $(".address-display").html(addressDisplayText); // was "result.addressLine1Modified + '<br>' + result.addressLine2Modified;"
+                    let addressDisplayText = result.addressTextModified; 
+                    $(".address-display").html(addressDisplayText); 
                     $("#address-send").attr("value", addressDisplayText); // for the form submission(s); potentially move down to unit submit section and send "unitAddress"
                     $("#address-storage").attr("value", addressDisplayText); // house number, street, and unit (if any)
 
@@ -172,25 +177,35 @@
                     let site = $("#domain-storage").val();
                     pullPropertyInfo(addressDisplayText, agentId, site); // alternatively, we could do this in the address valdation endpoint
 
-                    $("#condo-unit-page").hide(); // may have never gotten here, but it would be shoowing if thought was a condo initially
+                    $("#zip-code-page").hide();
+                    $("#condo-unit-page").hide(); // may have never gotten here
                     $("#invalid-address-page").hide(); // for good measure(?)
                     $("#relationship-page").show();
-                } else if ((result.needUnit && !result.unitProvided) || (result.needUnit && result.invalidUnit)) {
-                    let addressDisplayText = result.addressTextModified;
+                } else if (result.invalidZip) {
+                    let addressDisplayText = address;
                     $(".address-display").html(addressDisplayText); 
                     $("#address-storage").attr("value", addressDisplayText); 
                     $("#relationship-page").hide();
-                    $("#invalid-address-page").hide(); // this is necessary in case first a nonsense address, then a unit number address
+                    $("#invalid-address-page").hide();
+                    $("#zip-code-page").show();
+                } else if ((result.needUnit && !result.unitProvided) || (result.needUnit && result.invalidUnit)) {
+                    console.log('We need a unit!');
+                    let addressDisplayText = result.addressTextModified;
+                    console.log('addressDisplayText: ' + addressDisplayText);
+                    $(".address-display").html(addressDisplayText); 
+                    $("#address-storage").attr("value", addressDisplayText); 
+                    $("#relationship-page").hide();
+                    $("#zip-code-page").hide();
+                    $("#invalid-address-page").hide(); 
                     $("#condo-unit-page").show();
                 } else {
                     console.log('Invalid address...deciding what to do next');
-                    // set message according to which address element is invalid
+                    $("#zip-code-page").hide();
+                    $("#condo-unit-page").hide();
                     $("#relationship-page").hide(); // but wouldn't it be this?
                     $("#invalid-address-page").show();
                     let errorMessage = 'We were unable to validate that address';
-                    if (result.invalidZip) {
-                        errorMessage = 'Need a valid city & state or zip code';
-                    } else if (result.extraneousUnitProvided) {
+                    if (result.extraneousUnitProvided) {
                         errorMessage = 'Did you mean to submit a unit number?';
                     }
                     $(".address-error-message").html(errorMessage);
@@ -198,26 +213,21 @@
             } catch (error) {
                 console.log(error);
             }
-
-            // }).fail(function (err) {
-            //     console.log('Unabled to validate address; proceeding anyway');
-            //     console.log(err);
         });
     }
 
     $(document).ready(function () {
         let queryString = window.location.search;
         let params = new URLSearchParams(queryString);
-        let site = params.get("site"); // added 5/25/2022
+        let site = params.get("site"); 
         let address = params.get("address");
-        let agentId = params.get("agent"); // added 6/27/2022
+        let agentId = params.get("agent"); 
 
         console.log('Pulled address from queryString: ' + address);
         console.log('Pulled source site from queryString: ' + site);
         console.log('Pulled agent from queryString: ' + agentId);
 
         if (!site || !address || !agentId) {
-            console.log("Referring site or address not provied; routing to main site");
             let routeTo = "https://my.homevalue.report";
             // let queryString = '?address=' + encodeURIComponent(address) + '&agent=' + encodeURIComponent(agentId) + '&site=' + encodeURIComponent(site);
             // routeTo = routeTo + queryString;
@@ -228,7 +238,7 @@
         // history.replaceState({}, null, "/value");  
 
         // IT'S possible that we should query with the source site name here to ensure safety
-        $("#agent-id-storage").attr("value", agentId); // get with $("#agent-id-storage").val();
+        $("#agent-id-storage").attr("value", agentId);
         console.log(agentId);
 
         // UPDATE ADDRESS DISPLAY AND STORAGE FIELDS
@@ -271,6 +281,21 @@
         // VALIDATE ADDRESS
         validateAddress(unitAddress); // don't set condo (false), because already did on first pull
     });   
+
+    document.getElementById("zip-submit-btn").addEventListener('click', (event) => {
+        let zipCode = document.getElementById("zip-code-input").value.trim();
+        let address = $("#address-storage").val();
+        console.log('Adding to address from storage: ' + address);
+
+        let zipCodeAddress = addZipCode(address, zipCode);
+
+        // SHOW LOADER
+        $('#updating-home-details-loader').removeClass('hide');
+
+        // VALIDATE ADDRESS
+        validateAddress(zipCodeAddress);
+        setTimeout(function () { $("#market-analysis-loader").hide(); }, 2500);
+    });       
 
     window.onbeforeunload = function() {  
         let finished = $("#finished").val();
@@ -383,11 +408,6 @@
             submittedNumber = ' ';
         }
 
-        // CONVENTION that we're now following is...
-        // our variables are first letter caps separated with "-"
-        // Mel is all first letter caps with no sepator
-        // batch is camelCase
-        // the only exceptions are in the keys (agentId, sessionId)
         let sessionInfo = {
             "site": site,
             "sessionId": sessionId,
@@ -430,9 +450,9 @@
             // TOOK THE BELOW OUT OF submitSellerDetails()
             let addressSend = $("#address-storage").val();
             $("#address-appointment").attr("value", addressSend); // for the form submission(s); potentially move down to unit submit section and send "unitAddress"
-            $("#address-virtual-appointment").attr("value", addressSend); // for the form submission(s); potentially move down to unit submit section and send "unitAddress"
+            $("#address-virtual-appointment").attr("value", addressSend);
 
-            // Send off session update to backend
+            // Send off session update
             let sessionInfo = getCurrentSessionInfo();
             sessionInfo["finished"] = true;
             $("#finished").attr("value", true);
