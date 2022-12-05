@@ -1,21 +1,3 @@
-
-let addressInput = 'address-correction-input';
-var placeSearch, autocomplete;
-function initAutocomplete() {
-    var input = document.getElementById(addressInput);
-    autocomplete = new google.maps.places.Autocomplete(input);
-    autocomplete.setComponentRestrictions({ 'country': ['us'] }); // add 'ca' if want Canada
-    autocomplete.addListener('place_changed', fillInAddress);
-}
-function fillInAddress() {
-    // Get the place details from the autocomplete object.
-    var place = autocomplete.getPlace();
-    if (typeof place.formatted_address != "undefined") {
-        console.log(place.formatted_address);
-        document.getElementById(addressInput).value = place.formatted_address;
-    }
-}
-
 $("body").on("click", "#submit-address-correction-btn", async function (e) {
     e.preventDefault(); // prevent webflow defaults
     // $('#submit-address-correction-btn').val("Going...");
