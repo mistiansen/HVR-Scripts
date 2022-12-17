@@ -13,8 +13,7 @@ $("body").on("click", "#submit-address-correction-btn", async function (e) {
 });
 
 
-// let backendPath = "https://hhvjdbhqp4.execute-api.us-east-1.amazonaws.com/prod";
-let backendPath = "https://1snwvce58a.execute-api.us-east-1.amazonaws.com/dev";
+let backendPath = "https://hhvjdbhqp4.execute-api.us-east-1.amazonaws.com/prod";
 
 var formatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
