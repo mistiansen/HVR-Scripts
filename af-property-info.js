@@ -190,39 +190,39 @@ function validateAddress(address) {
 }
 
 
-$(document).ready(function () {
-    let queryString = window.location.search;
-    let params = new URLSearchParams(queryString);
-    let address = params.get("address");
-    // let destination = params.get("dest");
-    let destination = params.get("");
-    console.log('Here is the destination: ' + destination);
+// $(document).ready(function () {
+//     let queryString = window.location.search;
+//     let params = new URLSearchParams(queryString);
+//     let address = params.get("address");
+//     // let destination = params.get("dest");
+//     let destination = params.get("");
+//     console.log('Here is the destination: ' + destination);
 
-    console.log('Pulled address from queryString: ' + address);
-    console.log('Pulled destination from queryString: ' + destination);
+//     console.log('Pulled address from queryString: ' + address);
+//     console.log('Pulled destination from queryString: ' + destination);
 
-    if (!address || !destination) {
-        console.log('No address or destination');
-    }
+//     if (!address || !destination) {
+//         console.log('No address or destination');
+//     }
 
-    // history.replaceState({}, null, "/value");  
+//     // history.replaceState({}, null, "/value");  
 
-    // IT'S possible that we should query with the source site name here to ensure safety
-    $("#destination-storage").attr("value", destination);
-    console.log(destination);
+//     // IT'S possible that we should query with the source site name here to ensure safety
+//     $("#destination-storage").attr("value", destination);
+//     console.log(destination);
 
-    // UPDATE ADDRESS DISPLAY AND STORAGE FIELDS
-    $(".address-display").html(address);
-    $("#address-storage").attr("value", address); // NOTE - consider removing
+//     // UPDATE ADDRESS DISPLAY AND STORAGE FIELDS
+//     $(".address-display").html(address);
+//     $("#address-storage").attr("value", address); // NOTE - consider removing
 
-    // HIDE UNUSED LOADERS
-    $("#market-analysis-loader").show();
-    // $('#updating-home-details-loader').removeClass('hide');
-    $('#updating-home-details-loader').hide();
+//     // HIDE UNUSED LOADERS
+//     $("#market-analysis-loader").show();
+//     // $('#updating-home-details-loader').removeClass('hide');
+//     $('#updating-home-details-loader').hide();
 
-    validateAddress(address);
-    setTimeout(function () { $("#market-analysis-loader").hide(); }, 2500);
-});
+//     validateAddress(address);
+//     setTimeout(function () { $("#market-analysis-loader").hide(); }, 2500);
+// });
 
 document.getElementById("no-unit-btn").addEventListener('click', (event) => {
     console.log('Just clicked no unit btn');
