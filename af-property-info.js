@@ -15,7 +15,7 @@ $("body").on("click", "#submit-address-correction-btn", async function (e) {
 });
 
 
-let backendPath = "https://hhvjdbhqp4.execute-api.us-east-1.amazonaws.com/prod";
+// let backendPath = "https://hhvjdbhqp4.execute-api.us-east-1.amazonaws.com/prod";
 
 var formatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -99,6 +99,7 @@ function pullPropertyInfo(address, destination) {
     }
 
     console.log('Pulling property info for ' + address);
+    let backendPath = "https://hhvjdbhqp4.execute-api.us-east-1.amazonaws.com/prod";
     let url = backendPath + "/property";
     $.ajax({
         url: url,
@@ -119,6 +120,7 @@ function pullPropertyInfo(address, destination) {
 
 function validateAddress(address) {
     console.log('About to validate address: ' + address);
+    let backendPath = "https://hhvjdbhqp4.execute-api.us-east-1.amazonaws.com/prod";
     let url = backendPath + "/address";
     $.ajax({
         url: url,
@@ -287,6 +289,7 @@ function mobileCheck() {
 };
 
 function handleBounce() {
+    let backendPath = "https://hhvjdbhqp4.execute-api.us-east-1.amazonaws.com/prod";
     let finished = $("#finished").val(); // has a value if already bounced or reached report
     if (!finished) { // if no value has been set
         let sessionInfo = getCurrentSessionInfo();
@@ -322,6 +325,7 @@ document.querySelectorAll('.show-report').forEach(item => {
 });
 
 function updateSession(sessionFields) {
+    let backendPath = "https://hhvjdbhqp4.execute-api.us-east-1.amazonaws.com/prod";
     console.log('Right before updateSession()');
     let request = $.ajax({
         url: backendPath + "/session",
