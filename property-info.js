@@ -42,7 +42,7 @@ function parseValuationResult(result) {
         } else {
             let adjustedEstimate = estimatedValue;
             console.log('Got adjustedEstimate: ' + adjustedEstimate);
-            $("#value-storage").attr("value", adjustedEstimate); // added 12-27-2022 to decide whether to show failure page
+            $("#value-estimate-storage").attr("value", adjustedEstimate); // added 12-27-2022 to decide whether to show failure page
             $(".selling-estimate").html(adjustedEstimate);
             $(".selling-estimate").val(adjustedEstimate);
             $(".value-estimate").html(estimatedValue);
@@ -320,8 +320,8 @@ document.onvisibilitychange = function () {
 document.querySelectorAll('.show-report').forEach(item => {
     item.addEventListener('click', event => {
         $("#visitor-info-page").hide();
-        let valueEstimate = $("#value-storage").val();
-        console.log("Got valueEstimate from #value-storage: " + valueEstimate);
+        let valueEstimate = $("#value-estimate-storage").val();
+        console.log("Got valueEstimate from #value-estimate-storage: " + valueEstimate);
         if ((valueEstimate === "" || valueEstimate === "$0" || valueEstimate === "$NaN" || typeof valueEstimate === "undefined" || !valueEstimate)) {
             console.log("Should show failure page");
             $("#failure-page").show();
