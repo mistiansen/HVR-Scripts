@@ -1,25 +1,11 @@
-$("body").on("click", "#submit-address-correction-btn", async function (e) {
-    e.preventDefault(); // prevent webflow defaults
-    // $('#submit-address-correction-btn').val("Going...");
-
-    $("#market-analysis-loader").show();
-
-    let address = document.getElementById("address-correction-input").value.trim();
-    $(".address-display").html(address); // we want to show, but not necessarily store/send 
-
-    // RE-VALIDATE ADDRESS
-    validateAddress(address);
-    setTimeout(function () { $("#market-analysis-loader").hide(); }, 2000);
-});
-
-
 let backendPath = "https://hhvjdbhqp4.execute-api.us-east-1.amazonaws.com/prod";
+// let backendPath = "https://1snwvce58a.execute-api.us-east-1.amazonaws.com/dev";
 
 var formatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0, // (2500.99 printed as $2,501)
+    maximumFractionDigits: 0,
 });
 
 function addUnit(address, unit) {
@@ -56,6 +42,7 @@ function parseValuationResult(result) {
         } else {
             let adjustedEstimate = estimatedValue;
             console.log('Got adjustedEstimate: ' + adjustedEstimate);
+            $("#value-storage").attr("value", adjustedEstimate); // added 12-27-2022 to decide whether to show failure page
             $(".selling-estimate").html(adjustedEstimate);
             $(".selling-estimate").val(adjustedEstimate);
             $(".value-estimate").html(estimatedValue);
@@ -162,7 +149,7 @@ function validateAddress(address) {
                 $("#relationship-page").hide();
                 $("#invalid-address-page").hide();
                 $("#zip-code-page").show();
-            } else if ((result.needUnit && !result.unitProvided) || (result.needUnit && result.invalidUnit)) {
+            } else if ((result.needUnit && !result.unitProvided)) {
                 console.log('We need a unit!');
                 let addressDisplayText = result.addressTextModified;
                 console.log('addressDisplayText: ' + addressDisplayText);
@@ -172,6 +159,16 @@ function validateAddress(address) {
                 $("#zip-code-page").hide();
                 $("#invalid-address-page").hide();
                 $("#condo-unit-page").show();
+            } else if ((result.needUnit && result.invalidUnit)) {
+                console.log('We need a unit!');
+                let addressDisplayText = result.addressTextModified;
+                console.log('addressDisplayText: ' + addressDisplayText);
+                $(".address-display").html(addressDisplayText);
+                $("#address-storage").attr("value", addressDisplayText);
+                $("#relationship-page").hide();
+                $("#zip-code-page").hide();
+                $("#invalid-address-page").hide();
+                $("#invaid-unit-page").show();
             } else {
                 console.log('Invalid address...deciding what to do next');
                 $("#zip-code-page").hide();
@@ -228,18 +225,21 @@ $(document).ready(function () {
     $('#updating-home-details-loader').hide();
 
     validateAddress(address);
+    history.replaceState({}, null, "value");
     setTimeout(function () { $("#market-analysis-loader").hide(); }, 2500);
 });
 
 document.getElementById("no-unit-btn").addEventListener('click', (event) => {
     console.log('Just clicked no unit btn');
     console.log('Progressing without re-validating the no-unit address');
+    $("#unit-storage").attr("value", ""); // NOTE - NEW ADDED 12/19/22
     $("#condo-unit-page").hide();
 });
 
 document.getElementById("unit-submit-btn").addEventListener('click', (event) => {
     // STORE UNIT
     let unit = document.getElementById("unit-input").value.trim();
+    $("#unit-storage").attr("value", unit); // NOTE - NEW ADDED 12/19/22
     console.log('User entered unit: ' + unit);
 
     // UPDATE ADDRESS
@@ -316,13 +316,23 @@ document.onvisibilitychange = function () {
     }
 };
 
+
 document.querySelectorAll('.show-report').forEach(item => {
     item.addEventListener('click', event => {
         $("#visitor-info-page").hide();
-        $("#success-page").show();
-        $('#success-loader').css('display', 'flex'); // replacing typical "$("#success-loader").show();" ; alternative may be to always show it with 'flex' in webflow then just do the .hide() step below
-        setTimeout(function () { $("#success-loader").hide(); }, 3000);
-        $(".value-div").show();
+        let valueEstimate = $("#value-storage").val();
+        console.log("Got valueEstimate from #value-storage: " + valueEstimate);
+        if ((valueEstimate === "" || valueEstimate === "$0" || valueEstimate === "$NaN" || typeof valueEstimate === "undefined" || !valueEstimate)) {
+            console.log("Should show failure page");
+            $("#failure-page").show();
+            $('#failure-loader').css('display', 'flex'); // replacing typical "$("#success-loader").show();" ; alternative may be to always show it with 'flex' in webflow then just do the .hide() step below
+            setTimeout(function () { $("#failure-loader").hide(); }, 3000);
+        } else {
+            $("#success-page").show();
+            $('#success-loader').css('display', 'flex'); // replacing typical "$("#success-loader").show();" ; alternative may be to always show it with 'flex' in webflow then just do the .hide() step below
+            setTimeout(function () { $("#success-loader").hide(); }, 3000);
+            $(".value-div").show();
+        }
     })
 });
 
@@ -426,14 +436,3 @@ for (const showReportButton of showReportButtons) {
         updateSession(sessionInfo);
     });
 }
-
-
-$(document).ready(function () {
-    $(window).keydown(function (event) {
-        if (event.keyCode == 13) {
-            console.log('Preventing enter button submission');
-            event.preventDefault();
-            return false;
-        }
-    });
-});
