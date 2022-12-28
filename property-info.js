@@ -94,6 +94,7 @@ function pullPropertyInfo(address, agentId, domain) {
         let sessionId = result.sessionId; // this becomes the sessionId that tracks subsequent changes
         $("#session-id-storage").attr("value", sessionId); // this becomes the sessionId that tracks subsequent changes
         $('.session-id-storage-class').attr("value", sessionId); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
+        $('.session-id-storage-class').html(sessionId); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
         console.log('Pulled this property: ' + property);
         console.log('Pulled this sessionId: ' + sessionId);
         return parseValuationResult(property);
@@ -128,6 +129,7 @@ function validateAddress(address) {
                 $("#address-storage").attr("value", addressDisplayText); // house number, street, and unit (if any)
 
                 $('.address-storage-class').attr("value", address); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
+                $('.address-storage-class').html(address); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
 
                 $("#street-storage").attr("value", result.street);
                 $("#unit-storage").attr("value", result.unit); // should be included above in street, I think
@@ -148,6 +150,7 @@ function validateAddress(address) {
             } else if (result.invalidZip) {
                 let addressDisplayText = address;
                 $('.address-storage-class').attr("value", address); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
+                $('.address-storage-class').html(address); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
                 $(".address-display").html(addressDisplayText);
                 $("#address-storage").attr("value", addressDisplayText);
                 $("#relationship-page").hide();
@@ -158,6 +161,7 @@ function validateAddress(address) {
                 let addressDisplayText = result.addressTextModified;
                 console.log('addressDisplayText: ' + addressDisplayText);
                 $('.address-storage-class').attr("value", address); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
+                $('.address-storage-class').html(address); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
                 $(".address-display").html(addressDisplayText);
                 $("#address-storage").attr("value", addressDisplayText);
                 $("#relationship-page").hide();
@@ -169,6 +173,7 @@ function validateAddress(address) {
                 let addressDisplayText = result.addressTextModified;
                 console.log('addressDisplayText: ' + addressDisplayText);
                 $('.address-storage-class').attr("value", address); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
+                $('.address-storage-class').html(address); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
                 $(".address-display").html(addressDisplayText);
                 $("#address-storage").attr("value", addressDisplayText);
                 $("#relationship-page").hide();
