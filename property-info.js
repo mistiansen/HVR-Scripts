@@ -434,6 +434,9 @@ document.querySelectorAll('.show-report').forEach(item => {
         $("#visitor-info-page").hide();
         let valueEstimate = $("#value-estimate-storage").val();
         console.log("Got valueEstimate from #value-estimate-storage: " + valueEstimate);
+
+        let addressSend = $("#address-storage").val();
+        console.log("Got addressSend from #address-storage: " + addressSend);
         if ((valueEstimate === "" || valueEstimate === "$0" || valueEstimate === "$NaN" || typeof valueEstimate === "undefined" || !valueEstimate)) {
             console.log("Should show failure page");
             $("#failure-page").show();
@@ -450,7 +453,6 @@ document.querySelectorAll('.show-report').forEach(item => {
             $(".value-div").show();
 
             // TOOK THE BELOW OUT OF submitSellerDetails()
-            let addressSend = $("#address-storage").val();
             $("#address-appointment").attr("value", addressSend); // for the form submission(s); potentially move down to unit submit section and send "unitAddress"
             $("#address-virtual-appointment").attr("value", addressSend);
 
