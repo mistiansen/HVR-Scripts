@@ -57,6 +57,7 @@ function parseValuationResult(result) {
         }
     } catch (error) {
         console.log(error);
+        $("#failed-property-pull").attr("value", "true"); // NEW - ADDED 12-29-2022 to set and send with forms (e.g., request detailed report form)        
         $(".offer-header").html("We were unable to pull your value report");
         $(".value-estimate").html("$-");
         $(".value-estimate-min").html("$-");
@@ -329,11 +330,12 @@ function handleBounce() {
     // let failedPropertyInfo = $("#failed-property-pull").val();
     // console.log("Checking for failed property pull in handbounce: " + failedPropertyInfo);
     // if (!finished && !failedPropertyInfo) { // but if they bounce very early, this won't work. It will attempt to update the session. 
-    if (!finished && !failedPropertyInfo) { // but if they bounce very early, this won't work. It will attempt to update the session.         
+    if (!finished) { // but if they bounce very early, this won't work. It will attempt to update the session.         
         let sessionInfo = getCurrentSessionInfo();
         sessionInfo["finished"] = false;
         sessionInfo["bounced"] = true;
         if (sessionInfo["sessionId"]) {
+            console.log('Sending a beacon because we do have a sessionId: ' + sessionInfo["sessionId"]);
             sessionInfo = JSON.stringify(sessionInfo);
             navigator.sendBeacon(backendPath + "/session", sessionInfo);
         }
@@ -451,7 +453,7 @@ document.querySelectorAll('.selling-timeframe-btn').forEach(item => {
         console.log("Printing here?!");
 
         // TODO - set a retry counter (?)
-        if (!failedPropertyInfo && (valueEstimate === "" || valueEstimate === "$0" || valueEstimate === "$NaN" || typeof valueEstimate === "undefined" || !valueEstimate)) {
+        if (!failedPropertyInfo && (valueEstimate === "" || valueEstimate === "$0" || valueEstimate === "$-" || typeof valueEstimate === "undefined" || !valueEstimate)) {
             console.log('Waiting 2 secs');
             await delay(2000);
             failedPropertyInfo = $("#failed-property-pull").val();
@@ -485,7 +487,7 @@ document.querySelectorAll('.show-report').forEach(item => {
 
         let addressSend = $("#address-storage").val();
         console.log("Got addressSend from #address-storage: " + addressSend);
-        if ((valueEstimate === "" || valueEstimate === "$0" || valueEstimate === "$NaN" || typeof valueEstimate === "undefined" || !valueEstimate)) {
+        if ((valueEstimate === "" || valueEstimate === "$0" || valueEstimate === "$-" || typeof valueEstimate === "undefined" || !valueEstimate)) {
             console.log("Should show failure page");
             $("#failure-page").show();
             $('#failure-loader').css('display', 'flex'); // replacing typical "$("#success-loader").show();" ; alternative may be to always show it with 'flex' in webflow then just do the .hide() step below
