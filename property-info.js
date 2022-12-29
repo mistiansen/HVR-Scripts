@@ -455,7 +455,6 @@ document.querySelectorAll('.selling-timeframe-btn').forEach(item => {
 
         if (failedPropertyInfo) {
             console.log("Should show failure page");
-            $("#visitor-info-page").hide();
 
             let addressSend = $("#address-storage").val();
             console.log("Got addressSend from #address-storage: " + addressSend);
@@ -464,6 +463,10 @@ document.querySelectorAll('.selling-timeframe-btn').forEach(item => {
             $("#failure-page").show();
             $('#failure-loader').css('display', 'flex'); // replacing typical "$("#success-loader").show();" ; alternative may be to always show it with 'flex' in webflow then just do the .hide() step below
             setTimeout(function () { $("#failure-loader").hide(); }, 3000);
+
+            // await delay(2000);
+            $("#visitor-info-page").hide();
+            console.log("Should have just hidden visitor info page");
         }
     })
 });
