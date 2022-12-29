@@ -326,12 +326,17 @@ function mobileCheck() {
 
 function handleBounce() {
     let finished = $("#finished").val(); // has a value if already bounced or reached report
-    if (!finished) { // if no value has been set
+    // let failedPropertyInfo = $("#failed-property-pull").val();
+    // console.log("Checking for failed property pull in handbounce: " + failedPropertyInfo);
+    // if (!finished && !failedPropertyInfo) { // but if they bounce very early, this won't work. It will attempt to update the session. 
+    if (!finished && !failedPropertyInfo) { // but if they bounce very early, this won't work. It will attempt to update the session.         
         let sessionInfo = getCurrentSessionInfo();
         sessionInfo["finished"] = false;
         sessionInfo["bounced"] = true;
-        sessionInfo = JSON.stringify(sessionInfo);
-        navigator.sendBeacon(backendPath + "/session", sessionInfo);
+        if (sessionInfo["sessionId"]) {
+            sessionInfo = JSON.stringify(sessionInfo);
+            navigator.sendBeacon(backendPath + "/session", sessionInfo);
+        }
         $("#finished").attr("value", "no"); // technically "bounced", but just needs any value so we don't re-notify
     }
 }
