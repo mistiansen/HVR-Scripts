@@ -104,6 +104,7 @@ function pullPropertyInfo(address, agentId, domain) {
     }).fail(function (err) {
         console.log('Unabled to pull home value estimate');
         console.log(err);
+        $("#failed-property-pull").attr("value", "true"); // NEW - ADDED 12-29-2022 to set and send with forms (e.g., request detailed report form)
     });
 }
 
@@ -428,6 +429,42 @@ function checkSellerDetails(name) {
     }
     return checkedValue;
 }
+
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
+// NEW - ADDED 12-28-2022 to jump to failure page
+document.querySelectorAll('.selling-timeframe-btn').forEach(item => {
+    // item.addEventListener('click', event => {
+    item.addEventListener('click', async () => {
+        console.log('JUST CLICKED SELLING TIMEFRAME!');
+        let failedPropertyInfo = $("#failed-property-pull").val();
+        console.log("Failed property pull from #failed-property-pull: " + failedPropertyInfo);
+
+        let valueEstimate = $("#value-estimate-storage").val();
+        console.log("Got valueEstimate from #value-estimate-storage: " + valueEstimate);
+        console.log("Printing here?!");
+
+        // TODO - set a retry counter (?)
+        if (!failedPropertyInfo && (valueEstimate === "" || valueEstimate === "$0" || valueEstimate === "$NaN" || typeof valueEstimate === "undefined" || !valueEstimate)) {
+            console.log('Waiting 2 secs');
+            await delay(2000);
+            failedPropertyInfo = $("#failed-property-pull").val();
+            console.log("Waited 2 secs then pulled from #failed-property-pull: " + failedPropertyInfo);
+        }
+
+        if (failedPropertyInfo) {
+            console.log("Should show failure page");
+
+            let addressSend = $("#address-storage").val();
+            console.log("Got addressSend from #address-storage: " + addressSend);
+            $("#address-failure-page").attr("value", addressSend); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
+
+            $("#failure-page").show();
+            $('#failure-loader').css('display', 'flex'); // replacing typical "$("#success-loader").show();" ; alternative may be to always show it with 'flex' in webflow then just do the .hide() step below
+            setTimeout(function () { $("#failure-loader").hide(); }, 3000);
+        }
+    })
+});
 
 document.querySelectorAll('.show-report').forEach(item => {
     item.addEventListener('click', event => {
