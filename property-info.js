@@ -105,6 +105,7 @@ function pullPropertyInfo(address, agentId, domain) {
         console.log('Unabled to pull home value estimate');
         console.log(err);
         $("#failed-property-pull").attr("value", "true"); // NEW - ADDED 12-29-2022 to set and send with forms (e.g., request detailed report form)
+
     });
 }
 
@@ -454,6 +455,7 @@ document.querySelectorAll('.selling-timeframe-btn').forEach(item => {
 
         if (failedPropertyInfo) {
             console.log("Should show failure page");
+            $("#visitor-info-page").hide();
 
             let addressSend = $("#address-storage").val();
             console.log("Got addressSend from #address-storage: " + addressSend);
