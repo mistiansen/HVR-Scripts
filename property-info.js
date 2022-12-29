@@ -434,6 +434,7 @@ document.querySelectorAll('.show-report').forEach(item => {
         $("#visitor-info-page").hide();
         let valueEstimate = $("#value-estimate-storage").val();
         console.log("Got valueEstimate from #value-estimate-storage: " + valueEstimate);
+        console.log("Printing here?!");
 
         let addressSend = $("#address-storage").val();
         console.log("Got addressSend from #address-storage: " + addressSend);
