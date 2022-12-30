@@ -72,12 +72,12 @@ function parseValuationResult(result) {
     }
 }
 
-// function pullPropertyInfo(addressText, street, city, state, zip, agentId, domain) {
-function pullPropertyInfo(addressText, agentId, domain) {
+// function pullPropertyInfo(address, street, city, state, zip, agentId, domain) {
+function pullPropertyInfo(address, agentId, domain) {
 
     /* Currently, each pullPropertyInfo request returns a new sessionId */
     let propertyRequest = {
-        "address": addressText,
+        "address": address,
         // "validatedStreet": street, // for the skiptrace if property info pull fails
         // "ValidatedCity": city,
         // "validatedState": state,
