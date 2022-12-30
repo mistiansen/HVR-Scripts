@@ -72,10 +72,19 @@ function parseValuationResult(result) {
     }
 }
 
-function pullPropertyInfo(address, agentId, domain) {
+// function pullPropertyInfo(addressText, street, city, state, zip, agentId, domain) {
+function pullPropertyInfo(addressText, agentId, domain) {
 
     /* Currently, each pullPropertyInfo request returns a new sessionId */
-    let propertyRequest = { "address": address, "agentId": agentId, "site": domain };
+    let propertyRequest = {
+        "address": addressText,
+        // "validatedStreet": street, // for the skiptrace if property info pull fails
+        // "ValidatedCity": city,
+        // "validatedState": state,
+        // "validatedZip": zip, // for the skiptrace if property info pull fails
+        "agentId": agentId,
+        "site": domain
+    };
 
     // ADDED 8/22/22 - Use existing sessionId if it exists
     let sessionId = $("#session-id-storage").val();
@@ -151,6 +160,7 @@ function validateAddress(address) {
                 let agentId = $("#agent-id-storage").val();
                 let site = $("#domain-storage").val();
                 pullPropertyInfo(addressDisplayText, agentId, site); // alternatively, we could do this in the address valdation endpoint
+                // pullPropertyInfo(addressDisplayText, result.street, result.city, result.state, result.zip, agentId, site); // alternatively, we could do this in the address valdation endpoint
 
                 $("#zip-code-page").hide();
                 $("#condo-unit-page").hide(); // may have never gotten here
@@ -381,6 +391,16 @@ function getCurrentSessionInfo() {
     console.log('Got sessionId from div before submit: ' + sessionId);
     console.log('Got agentId from div before submit: ' + agentId);
 
+    // PULL validated address info to attempt the skiptrace in the backend
+    let validatedStreet = $("#street-storage").val();
+    let validatedUnit = $("#unit-storage").val();
+    let validatedUnitType = $("#unit-type-storage").val();
+    let validatedCity = $("#city-storage").val();
+    let validatedState = $("#state-storage").val();
+    let validatedZip = $("#zip-storage").val();
+    console.log('Got validated street from div before submit: ' + validatedStreet);
+    console.log('Got validated zip from div before submit: ' + validatedZip);
+
     let addressSend = $("#address-storage").val();
 
     let submittedName;
@@ -412,6 +432,12 @@ function getCurrentSessionInfo() {
         "Submitted-Address": addressSend, // "Submitted Address": addressSend,
         "Submitted-Name": submittedName,
         "Submitted-Number": submittedNumber,
+        "validatedStreet": validatedStreet, // for the skiptrace if property info pull fails
+        "validatedUnit": validatedUnit,
+        "validatedUnitType": validatedUnitType,
+        "ValidatedCity": validatedCity,
+        "validatedState": validatedState,
+        "validatedZip": validatedZip, // for the skiptrace if property info pull fails                
     }
 
     let checkRadioNames = ["Relationship-to-Home", "Considering-Selling"];
