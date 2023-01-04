@@ -227,6 +227,7 @@ function validateAddress(address) {
                     $("#relationship-page").hide();
                     $("#zip-code-page").hide();
                     $("#invalid-address-page").hide();
+                    $("#condo-unit-page").hide();
                     $("#confirm-unit-page").show();
                 }
             } else {
