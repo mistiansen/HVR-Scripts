@@ -119,6 +119,44 @@ function pullPropertyInfo(address, agentId, domain) {
     });
 }
 
+
+function storeValidatedAddressComponents(validationResult) {
+    // PARSE AND STORE VALIDATED ADDRESS COMPONENTS                         
+    let addressDisplayText = validationResult.addressTextModified;
+    $(".address-display").html(addressDisplayText);
+    $("#address-send").attr("value", addressDisplayText); // for the form submission(s); potentially move down to unit submit section and send "unitAddress"
+    $("#address-storage").attr("value", addressDisplayText); // house number, street, and unit (if any)
+
+    // $('.address-storage-class').attr("value", address); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
+    // $('.address-storage-class').html(address); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
+    // $(".address-storage-class").children().val(addressDisplayText); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
+    $("#address-failure-page").attr("value", addressDisplayText); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
+    document.getElementById("address-failure-page").value = addressDisplayText; // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
+
+    $("#street-storage").attr("value", validationResult.street);
+    $("#unit-storage").attr("value", validationResult.unit); // should be included above in street, I think
+    $("#unit-type-storage").attr("value", validationResult.unitType); // sub-premises type
+    $("#city-storage").attr("value", validationResult.city);
+    $("#state-storage").attr("value", validationResult.state);
+    $("#zip-storage").attr("value", validationResult.zip);
+}
+
+
+function proceedAfterAddressValidated(address) {
+    // REQUEST PROPERTY INFO FROM BACKEND
+    let agentId = $("#agent-id-storage").val();
+    let site = $("#domain-storage").val();
+    // let address = $("#address-storage").val(); // house number, street, and unit (if any)
+    pullPropertyInfo(address, agentId, site); // alternatively, we could do this in the address valdation endpoint
+
+    $("#zip-code-page").hide();
+    $("#condo-unit-page").hide(); // may have never gotten here
+    $("#confirm-unit-page").hide(); // may have never gotten here
+    $("#enter-different-unit-page").hide(); // may have never gotten here
+    $("#invalid-address-page").hide(); // for good measure(?)
+    $("#relationship-page").show();
+}
+
 function validateAddress(address) {
     console.log('About to validate address: ' + address);
     let url = backendPath + "/address";
@@ -134,43 +172,16 @@ function validateAddress(address) {
         // $('#updating-home-details-loader').css('display', 'flex');
         $('#market-analysis-loader').hide(); // maybe rename to "address-loader"
         try {
+            storeValidatedAddressComponents(result); // NEW 1/4/2022 - this would ALWAYS run, so elements SHOULD be safely overridden
             if (!result.invalidAddress) {
                 console.log('Looks like it was a valid address');
-
-                // PARSE AND STORE VALIDATED ADDRESS COMPONENTS                         
-                let addressDisplayText = result.addressTextModified;
-                $(".address-display").html(addressDisplayText);
-                $("#address-send").attr("value", addressDisplayText); // for the form submission(s); potentially move down to unit submit section and send "unitAddress"
-                $("#address-storage").attr("value", addressDisplayText); // house number, street, and unit (if any)
-
-                // $('.address-storage-class').attr("value", address); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
-                // $('.address-storage-class').html(address); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
-                // $(".address-storage-class").children().val(addressDisplayText); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
-                $("#address-failure-page").attr("value", addressDisplayText); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
-                document.getElementById("address-failure-page").value = addressDisplayText; // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
-
-                $("#street-storage").attr("value", result.street);
-                $("#unit-storage").attr("value", result.unit); // should be included above in street, I think
-                $("#unit-type-storage").attr("value", result.unitType); // sub-premises type
-                $("#city-storage").attr("value", result.city);
-                $("#state-storage").attr("value", result.state);
-                $("#zip-storage").attr("value", result.zip);
-
                 // REQUEST PROPERTY INFO FROM BACKEND
-                let agentId = $("#agent-id-storage").val();
-                let site = $("#domain-storage").val();
-                pullPropertyInfo(addressDisplayText, agentId, site); // alternatively, we could do this in the address valdation endpoint
-                // pullPropertyInfo(addressDisplayText, result.street, result.city, result.state, result.zip, agentId, site); // alternatively, we could do this in the address valdation endpoint
-
-                $("#zip-code-page").hide();
-                $("#condo-unit-page").hide(); // may have never gotten here
-                $("#invalid-address-page").hide(); // for good measure(?)
-                $("#relationship-page").show();
+                // NEW 1/4/2022 - THE ABOVE WRAPPED IN FUNCTION CALLS
+                // await storeValidatedAddressComponents(result); // NEW 1/4/2022 - is the await necessary? We definitely need the address to be there 
+                // storeValidatedAddressComponents(result); // NEW 1/4/2022 - is the await necessary? We definitely need the address to be there 
+                proceedAfterAddressValidated(result.addressTextModified);
             } else if (result.invalidZip) {
                 let addressDisplayText = address;
-                // $('.address-storage-class').attr("value", address); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
-                // $('.address-storage-class').html(address); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
-                // $(".address-storage-class").children().val(addressDisplayText); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
                 $("#address-failure-page").attr("value", addressDisplayText); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
                 document.getElementById("address-failure-page").value = addressDisplayText; // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
                 $(".address-display").html(addressDisplayText);
@@ -179,12 +190,9 @@ function validateAddress(address) {
                 $("#invalid-address-page").hide();
                 $("#zip-code-page").show();
             } else if ((result.needUnit && !result.unitProvided)) {
-                console.log('We need a unit!');
+                console.log('We need a unit and it looks like NO unit was provided');
                 let addressDisplayText = result.addressTextModified;
                 console.log('addressDisplayText: ' + addressDisplayText);
-                // $('.address-storage-class').attr("value", address); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
-                // $('.address-storage-class').html(address); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
-                // $(".address-storage-class").children().val(addressDisplayText); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
                 $("#address-failure-page").attr("value", addressDisplayText); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
                 document.getElementById("address-failure-page").value = addressDisplayText; // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
                 $(".address-display").html(addressDisplayText);
@@ -194,20 +202,27 @@ function validateAddress(address) {
                 $("#invalid-address-page").hide();
                 $("#condo-unit-page").show();
             } else if ((result.needUnit && result.invalidUnit)) {
-                console.log('We need a unit!');
+                console.log('We need a unit and it looks an invalid one was provided');
                 let addressDisplayText = result.addressTextModified;
                 console.log('addressDisplayText: ' + addressDisplayText);
-                // $('.address-storage-class').attr("value", address); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
-                // $('.address-storage-class').html(address); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
-                // $(".address-storage-class").children().val(addressDisplayText); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
                 $("#address-failure-page").attr("value", addressDisplayText); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
                 document.getElementById("address-failure-page").value = addressDisplayText; // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
-                $(".address-display").html(addressDisplayText);
-                $("#address-storage").attr("value", addressDisplayText);
-                $("#relationship-page").hide();
-                $("#zip-code-page").hide();
-                $("#invalid-address-page").hide();
-                $("#invaid-unit-page").show();
+
+                let unitCorrectionAttempted = $("#unit-correction-attempted").val();
+                if (unitCorrectionAttempted) {
+                    console.log('Proceeding because already attempted to correct the unit');
+                    storeValidatedAddressComponents(result);
+                    proceedAfterAddressValidated(result.addressTextModified);
+                } else {
+                    console.log('Have not yet attempted to correct the unit; doing so now');
+                    $("#unit-correction-attempted").attr("value", "true"); // ADDED 1/4/2022 - SET INDICATOR for whether to keep asking for unit
+                    $(".address-display").html(addressDisplayText);
+                    $("#address-storage").attr("value", addressDisplayText);
+                    $("#relationship-page").hide();
+                    $("#zip-code-page").hide();
+                    $("#invalid-address-page").hide();
+                    $("#confirm-unit-page").show();
+                }
             } else {
                 console.log('Invalid address...deciding what to do next');
                 $("#zip-code-page").hide();
@@ -300,8 +315,41 @@ document.getElementById("unit-submit-btn").addEventListener('click', (event) => 
     validateAddress(unitAddress); // don't set condo (false), because already did on first pull
 });
 
+document.getElementById("unit-correction-submit-btn").addEventListener('click', (event) => {
+    // STORE UNIT
+    let unit = document.getElementById("unit-correction-input").value.trim();
+    $("#unit-storage").attr("value", unit); // NOTE - NEW ADDED 12/19/22
+    console.log('User entered unit: ' + unit);
+
+    // UPDATE ADDRESS
+    console.log('Adding unit to address : ' + unit);
+    let address = $("#address-storage").val();
+    console.log('Adding to address from storage: ' + address);
+
+    let unitAddress = addUnit(address, unit);
+
+    // SHOW LOADER
+    $('#updating-home-details-loader').removeClass('hide');
+
+    // VALIDATE ADDRESS
+    validateAddress(unitAddress); // don't set condo (false), because already did on first pull
+});
+
+document.getElementById("unit-is-correct-btn").addEventListener('click', (event) => {
+    // PRETEND LIKE THE ADDRESS WAS VALIDATED
+    let address = $("#address-storage").val();
+    proceedAfterAddressValidated(address);
+});
+
+document.getElementById("new-unit-needed-btn").addEventListener('click', (event) => {
+    $("#confirm-unit-page").hide();
+    $("#enter-different-unit-page").show();
+});
+
 document.getElementById("zip-submit-btn").addEventListener('click', (event) => {
     let zipCode = document.getElementById("zip-code-input").value.trim();
+    $("#zip-storage").attr("value", unit); // NOTE - NEW ADDED 1/4/2022 (not sure it's necessary)
+
     let address = $("#address-storage").val();
     console.log('Adding to address from storage: ' + address);
 
@@ -311,7 +359,7 @@ document.getElementById("zip-submit-btn").addEventListener('click', (event) => {
     $('#updating-home-details-loader').removeClass('hide');
 
     // VALIDATE ADDRESS
-    validateAddress(zipCodeAddress);
+    validateAddress(zipCodeAddress); // should overwrite any invalid address items
     setTimeout(function () { $("#market-analysis-loader").hide(); }, 2500);
 });
 
