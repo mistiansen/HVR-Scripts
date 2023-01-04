@@ -297,6 +297,7 @@ document.getElementById("no-unit-btn").addEventListener('click', (event) => {
     console.log('Just clicked no unit btn');
     console.log('Progressing without re-validating the no-unit address');
     $("#unit-storage").attr("value", ""); // NOTE - NEW ADDED 12/19/22
+    $(".unit-display").html(""); // NOTE - NEW ADDED 01/04/22
     $("#condo-unit-page").hide();
 });
 
@@ -304,6 +305,7 @@ document.getElementById("unit-submit-btn").addEventListener('click', (event) => 
     // STORE UNIT
     let unit = document.getElementById("unit-input").value.trim();
     $("#unit-storage").attr("value", unit); // NOTE - NEW ADDED 12/19/22
+    $(".unit-display").html(unit); // NOTE - NEW ADDED 01/04/22
     console.log('User entered unit: ' + unit);
 
     // UPDATE ADDRESS
@@ -312,6 +314,7 @@ document.getElementById("unit-submit-btn").addEventListener('click', (event) => 
     console.log('Adding to address from storage: ' + address);
 
     let unitAddress = addUnit(address, unit);
+    console.log('Now validating the address with the unit added: ' + unitAddress);
 
     // SHOW LOADER
     $('#updating-home-details-loader').removeClass('hide');
@@ -324,6 +327,7 @@ document.getElementById("unit-correction-submit-btn").addEventListener('click', 
     // STORE UNIT
     let unit = document.getElementById("unit-correction-input").value.trim();
     $("#unit-storage").attr("value", unit); // NOTE - NEW ADDED 12/19/22
+    $(".unit-display").html(unit); // NOTE - NEW ADDED 01/04/22
     console.log('User entered unit: ' + unit);
 
     // UPDATE ADDRESS
@@ -353,6 +357,7 @@ document.getElementById("unit-is-correct-btn").addEventListener('click', (event)
 
 document.getElementById("new-unit-needed-btn").addEventListener('click', (event) => {
     $("#confirm-unit-page").hide();
+    $("#relationship-page").hide(); // NOT sure why this is needed, but looks like it is
     $("#enter-different-unit-page").show();
 });
 
