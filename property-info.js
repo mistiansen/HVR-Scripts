@@ -300,6 +300,7 @@ document.getElementById("no-unit-btn").addEventListener('click', (event) => {
     $("#unit-storage").attr("value", ""); // NOTE - NEW ADDED 12/19/22
     $(".unit-display").html(""); // NOTE - NEW ADDED 01/04/22
     $("#condo-unit-page").hide();
+    $("#relationship-page").show(); // NOTE - NEW ADDED 01/04/22; previously (and still) handled by a Webflow legacy interaction
 });
 
 document.getElementById("unit-submit-btn").addEventListener('click', (event) => {
