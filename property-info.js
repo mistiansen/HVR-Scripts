@@ -22,7 +22,7 @@ function addUnit(address, unit) {
 }
 
 function formUnitAddressString(street, unitNumber, city, state, zip) {
-    let addressString = street + ' Unit ' + unitNumber + ', ' + city + + ', ' + state + ' ' + zip;
+    let addressString = street + ' Unit ' + unitNumber + ', ' + city + ', ' + state + ' ' + zip;
     return addressString
 }
 
@@ -138,7 +138,8 @@ function storeValidatedAddressComponents(validationResult) {
     $("#address-failure-page").attr("value", addressDisplayText); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
     document.getElementById("address-failure-page").value = addressDisplayText; // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
 
-    $("#street-storage").attr("value", validationResult.street);
+    // $("#street-storage").attr("value", validationResult.street);
+    $("#street-storage").attr("value", validationResult.streetNoUnit); // NOTE 1/4/2023 - WE need without unit, so can add unit on if it needs a corrected unit. "addressLine1" may also work. 
     $("#unit-storage").attr("value", validationResult.unit); // should be included above in street, I think
     $("#unit-type-storage").attr("value", validationResult.unitType); // sub-premises type
     $("#city-storage").attr("value", validationResult.city);
