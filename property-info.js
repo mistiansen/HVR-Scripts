@@ -21,6 +21,11 @@ function addUnit(address, unit) {
     return address;
 }
 
+function formUnitAddressString(street, unitNumber, city, state, zip) {
+    let addressString = street + ' Unit ' + unitNumber + ', ' + city + + ', ' + state + ' ' + zip;
+    return addressString
+}
+
 function addZipCode(address, zip) {
     if (typeof zip != "undefined" && zip.length > 0) {
         address = address + ' ' + zip;
@@ -323,10 +328,15 @@ document.getElementById("unit-correction-submit-btn").addEventListener('click', 
 
     // UPDATE ADDRESS
     console.log('Adding unit to address : ' + unit);
-    let address = $("#address-storage").val();
-    console.log('Adding to address from storage: ' + address);
+    // let address = $("#address-storage").val();
+    // console.log('Adding to address from storage: ' + address);
+    let street = $("#street-storage").val(); // NEW 1/4/2022 - these should all be set during the initial address validation attempt
+    let city = $("#city-storage").val();
+    let state = $("#state-storage").val();
+    let zip = $("#zip-storage").val();
 
-    let unitAddress = addUnit(address, unit);
+    // let unitAddress = addUnit(address, unit);
+    let unitAddress = formUnitAddressString(street, unit, city, state, zip);
 
     // SHOW LOADER
     $('#updating-home-details-loader').removeClass('hide');
