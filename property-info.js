@@ -366,7 +366,7 @@ document.getElementById("new-unit-needed-btn").addEventListener('click', (event)
 
 document.getElementById("zip-submit-btn").addEventListener('click', (event) => {
     let zipCode = document.getElementById("zip-code-input").value.trim();
-    $("#zip-storage").attr("value", unit); // NOTE - NEW ADDED 1/4/2022 (not sure it's necessary)
+    $("#zip-storage").attr("value", zipCode); // NOTE - NEW ADDED 1/4/2022 (not sure it's necessary)
 
     let address = $("#address-storage").val();
     console.log('Adding to address from storage: ' + address);
