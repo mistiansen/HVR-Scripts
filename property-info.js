@@ -324,6 +324,13 @@ document.getElementById("no-unit-btn").addEventListener('click', (event) => {
     $(".unit-display").html(""); // NOTE - NEW ADDED 01/04/22
     $("#condo-unit-page").hide();
     $("#relationship-page").show(); // NOTE - NEW ADDED 01/04/22; previously (and still) handled by a Webflow legacy interaction
+
+    // NOTE - NEW ADDED 3/10/2023 - just attempt the property pull anyway
+    let address = $("#address-storage").val();
+    let agentId = $("#agent-id-storage").val();
+    let site = $("#domain-storage").val();
+    pullPropertyInfo(address, agentId, site); // we either need to do this here OR just go ahead and set ... 
+    // $("#failed-property-pull").attr("value", "true");
 });
 
 document.getElementById("unit-submit-btn").addEventListener('click', (event) => {
