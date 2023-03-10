@@ -167,15 +167,35 @@ function proceedAfterAddressValidated(address) {
 function validateAddress(address, startSession) {
     let agentId = $("#agent-id-storage").val();
     console.log('About to validate address: ' + address);
+
     let url = backendPath + "/address";
+    let request = { "address": address, "agentId": agentId };
+
+    // ADDED 3/10/23 - Use existing sessionId if it exists
+    if (!startSession) {
+        let sessionId = $("#session-id-storage").val();
+        if (typeof sessionId != "undefined" && sessionId.length > 0) {
+            console.log('Pulled this existing sessionId from session-id-storage before validating address: ' + sessionId);
+            request["sessionId"] = sessionId;
+        }
+    } else {
+        request["startSession"] = startSession;
+    }
     $.ajax({
         url: url,
         method: 'POST',
-        data: JSON.stringify({ "address": address, "startSession": startSession, "agentId": agentId }), // data: JSON.stringify(sellingDetails),
+        data: JSON.stringify(request), // data: JSON.stringify(sellingDetails),
     }).done(function (result) {
         console.log('Validation result ' + result);
         console.log('Invalid address? ' + result.invalidAddress);
         console.log('Submitted address ' + result.submittedAddress);
+
+        // ADDED 03/10/2023 - FOR TAKING SESSION IDs from backend
+        let sessionId = result.sessionId; // this becomes the sessionId that tracks subsequent changes
+        $("#session-id-storage").attr("value", sessionId); // this becomes the sessionId that tracks subsequent changes
+        $("#session-id-failure-page").attr("value", sessionId); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
+        document.getElementById("session-id-failure-page").value = sessionId; // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
+
         $('#updating-home-details-loader').hide()
         // $('#updating-home-details-loader').css('display', 'flex');
         $('#market-analysis-loader').hide(); // maybe rename to "address-loader"
