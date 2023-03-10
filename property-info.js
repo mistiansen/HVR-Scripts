@@ -165,12 +165,13 @@ function proceedAfterAddressValidated(address) {
 
 // function validateAddress(address) {
 function validateAddress(address, startSession) {
+    let agentId = $("#agent-id-storage").val();
     console.log('About to validate address: ' + address);
     let url = backendPath + "/address";
     $.ajax({
         url: url,
         method: 'POST',
-        data: JSON.stringify({ "address": address, "startSession": startSession }), // data: JSON.stringify(sellingDetails),
+        data: JSON.stringify({ "address": address, "startSession": startSession, "agentId": agentId }), // data: JSON.stringify(sellingDetails),
     }).done(function (result) {
         console.log('Validation result ' + result);
         console.log('Invalid address? ' + result.invalidAddress);
