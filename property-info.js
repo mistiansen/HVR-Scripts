@@ -163,13 +163,14 @@ function proceedAfterAddressValidated(address) {
     $("#relationship-page").show();
 }
 
-function validateAddress(address) {
+// function validateAddress(address) {
+function validateAddress(address, startSession) {
     console.log('About to validate address: ' + address);
     let url = backendPath + "/address";
     $.ajax({
         url: url,
         method: 'POST',
-        data: JSON.stringify({ "address": address }), // data: JSON.stringify(sellingDetails),
+        data: JSON.stringify({ "address": address, "startSession": startSession }), // data: JSON.stringify(sellingDetails),
     }).done(function (result) {
         console.log('Validation result ' + result);
         console.log('Invalid address? ' + result.invalidAddress);
@@ -290,7 +291,7 @@ $(document).ready(function () {
     // $('#updating-home-details-loader').removeClass('hide');
     $('#updating-home-details-loader').hide();
 
-    validateAddress(address);
+    validateAddress(address, true);
     history.replaceState({}, null, "value");
     setTimeout(function () { $("#market-analysis-loader").hide(); }, 2500);
 });
@@ -323,7 +324,7 @@ document.getElementById("unit-submit-btn").addEventListener('click', (event) => 
     $('#updating-home-details-loader').removeClass('hide');
 
     // VALIDATE ADDRESS
-    validateAddress(unitAddress); // don't set condo (false), because already did on first pull
+    validateAddress(unitAddress, false); // don't set condo (false), because already did on first pull
 });
 
 document.getElementById("unit-correction-submit-btn").addEventListener('click', (event) => {
@@ -349,7 +350,7 @@ document.getElementById("unit-correction-submit-btn").addEventListener('click', 
     $('#updating-home-details-loader').removeClass('hide');
 
     // VALIDATE ADDRESS
-    validateAddress(unitAddress); // don't set condo (false), because already did on first pull
+    validateAddress(unitAddress, false); // don't set condo (false), because already did on first pull
 });
 
 document.getElementById("unit-is-correct-btn").addEventListener('click', (event) => {
@@ -377,7 +378,7 @@ document.getElementById("zip-submit-btn").addEventListener('click', (event) => {
     $('#updating-home-details-loader').removeClass('hide');
 
     // VALIDATE ADDRESS
-    validateAddress(zipCodeAddress); // should overwrite any invalid address items
+    validateAddress(zipCodeAddress, false); // should overwrite any invalid address items
     setTimeout(function () { $("#market-analysis-loader").hide(); }, 2500);
 });
 
