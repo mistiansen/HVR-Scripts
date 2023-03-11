@@ -276,10 +276,17 @@ $(document).ready(function () {
     let site = params.get("site");
     let address = params.get("address");
     let agentId = params.get("agent");
+    let contactRequired = params.get("contactRequired");
 
     console.log('Pulled address from queryString: ' + address);
     console.log('Pulled source site from queryString: ' + site);
     console.log('Pulled agent from queryString: ' + agentId);
+    console.log('Pulled contactInfoRequired from queryString: ' + contactRequired);
+
+    if (typeof contactRequired == "undefined") {
+        contactRequired = true;
+    }
+    $("#contact-required").attr("value", contactRequired);
 
     if (!site || !address || !agentId) {
         let routeTo = "https://my.homevalue.report";
@@ -566,6 +573,13 @@ document.querySelectorAll('.selling-timeframe-btn').forEach(item => {
     // item.addEventListener('click', event => {
     item.addEventListener('click', async () => {
         console.log('JUST CLICKED SELLING TIMEFRAME!');
+        let contactInfoRequired = $("#contact-required").val();
+        console.log('We found this contactInfoRequired: ' + contactInfoRequired);
+        if (contactInfoRequired == "false" || !contactInfoRequired) {
+            console.log('Will hide the visitor info page');
+            $("#visitor-info-page").hide();
+        }
+
         let failedPropertyInfo = $("#failed-property-pull").val();
         console.log("Failed property pull from #failed-property-pull: " + failedPropertyInfo);
 
@@ -584,8 +598,6 @@ document.querySelectorAll('.selling-timeframe-btn').forEach(item => {
         if (failedPropertyInfo) {
             console.log("Should show failure page");
 
-            // $("#visitor-info-page").hide(); // NOTE - 3/10/2023 moved this up here...why was it after the 1700 ms delay?
-
             let addressSend = $("#address-storage").val();
             console.log("Got addressSend from #address-storage: " + addressSend);
             $("#address-failure-page").attr("value", addressSend); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
@@ -599,6 +611,21 @@ document.querySelectorAll('.selling-timeframe-btn').forEach(item => {
             console.log("Should have just hidden visitor info page");
 
             // NOTE - ADDED 3/10/2023 - Send off session update to finish here because we are done
+            let sessionInfo = getCurrentSessionInfo();
+            sessionInfo["finished"] = true;
+            $("#finished").attr("value", true);
+            updateSession(sessionInfo);
+        } else if (contactInfoRequired == "false" || !contactInfoRequired) {
+            $("#success-page").show();
+            $('#success-loader').css('display', 'flex'); // replacing typical "$("#success-loader").show();" ; alternative may be to always show it with 'flex' in webflow then just do the .hide() step below
+            setTimeout(function () { $("#success-loader").hide(); }, 3000);
+            $(".value-div").show();
+
+            // TOOK THE BELOW OUT OF submitSellerDetails()
+            $("#address-appointment").attr("value", addressSend); // for the form submission(s); potentially move down to unit submit section and send "unitAddress"
+            $("#address-virtual-appointment").attr("value", addressSend);
+
+            // Send off session update
             let sessionInfo = getCurrentSessionInfo();
             sessionInfo["finished"] = true;
             $("#finished").attr("value", true);
