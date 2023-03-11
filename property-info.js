@@ -584,6 +584,8 @@ document.querySelectorAll('.selling-timeframe-btn').forEach(item => {
         if (failedPropertyInfo) {
             console.log("Should show failure page");
 
+            $("#visitor-info-page").hide(); // NOTE - 3/10/2023 moved this up here...why was it after the 1700 ms delay?
+
             let addressSend = $("#address-storage").val();
             console.log("Got addressSend from #address-storage: " + addressSend);
             $("#address-failure-page").attr("value", addressSend); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
@@ -592,9 +594,15 @@ document.querySelectorAll('.selling-timeframe-btn').forEach(item => {
             $('#failure-loader').css('display', 'flex'); // replacing typical "$("#success-loader").show();" ; alternative may be to always show it with 'flex' in webflow then just do the .hide() step below
             setTimeout(function () { $("#failure-loader").hide(); }, 3000);
 
-            await delay(1700);
-            $("#visitor-info-page").hide();
-            console.log("Should have just hidden visitor info page");
+            // await delay(1700); // NOTE - 3/10/2023 - why was this here? to check again?
+            // $("#visitor-info-page").hide();
+            // console.log("Should have just hidden visitor info page");
+
+            // NOTE - ADDED 3/10/2023 - Send off session update to finish here because we are done
+            let sessionInfo = getCurrentSessionInfo();
+            sessionInfo["finished"] = true;
+            $("#finished").attr("value", true);
+            updateSession(sessionInfo);
         }
     })
 });
