@@ -253,16 +253,24 @@ function validateAddress(address, startSession) {
                     $("#confirm-unit-page").show();
                 }
             } else {
-                console.log('Invalid address...deciding what to do next');
-                $("#zip-code-page").hide();
-                $("#condo-unit-page").hide();
-                $("#relationship-page").hide(); // but wouldn't it be this?
-                $("#invalid-address-page").show();
-                let errorMessage = 'We were unable to validate that address';
-                if (result.extraneousUnitProvided) {
-                    errorMessage = 'Did you mean to submit a unit number?';
+                let addressCorrectionAttempted = $("#address-correction-attempted").val();
+                if (addressCorrectionAttempted) {
+                    console.log('Proceeding because already attempted to correct the address');
+                    storeValidatedAddressComponents(result);
+                    proceedAfterAddressValidated(result.addressTextModified);
+                } else {
+                    console.log('Invalid address...deciding what to do next');
+                    $("#address-correction-attempted").attr("value", "true"); // ADDED 1/4/2022 - SET INDICATOR for whether to keep asking for unit
+                    $("#zip-code-page").hide();
+                    $("#condo-unit-page").hide();
+                    $("#relationship-page").hide(); // but wouldn't it be this?
+                    $("#invalid-address-page").show();
+                    let errorMessage = 'We were unable to validate that address';
+                    if (result.extraneousUnitProvided) {
+                        errorMessage = 'Did you mean to submit a unit number?';
+                    }
+                    $(".address-error-message").html(errorMessage);
                 }
-                $(".address-error-message").html(errorMessage);
             }
         } catch (error) {
             console.log(error);
