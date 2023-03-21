@@ -257,7 +257,8 @@ function validateAddress(address, startSession) {
                 if (addressCorrectionAttempted) {
                     console.log('Proceeding because already attempted to correct the address');
                     storeValidatedAddressComponents(result);
-                    proceedAfterAddressValidated(result.addressTextModified);
+                    // proceedAfterAddressValidated(result.addressTextModified); // or should we do result.submittedAddress?
+                    proceedAfterAddressValidated(result.submittedAddress); // or should we do result.submittedAddress?
                 } else {
                     console.log('Invalid address...deciding what to do next');
                     $("#address-correction-attempted").attr("value", "true"); // ADDED 1/4/2022 - SET INDICATOR for whether to keep asking for unit
