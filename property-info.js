@@ -689,20 +689,21 @@ const delay = ms => new Promise(res => setTimeout(res, ms));
 // });
 
 document.getElementById("contact-submit-btn").addEventListener('click', (event) => {
-    $("#visitor-info-page").hide();
-    let valueEstimate = $("#value-estimate-storage").val();
-    console.log("Got valueEstimate from #value-estimate-storage: " + valueEstimate);
-    console.log("Printing here?!");
-
-    let addressSend = $("#address-storage").val();
-    console.log("Got addressSend from #address-storage: " + addressSend);
-
     let nameInput = $("#name-input").val();
     let phoneInput = $("#phone-input").val();
     if ((nameInput == null || nameInput == "") || (phoneInput == null || phoneInput == "")) {
         console.log('They did not provide details');
         $("#fields-required-warning").show();
     } else {
+        $("#visitor-info-page").hide();
+
+        let valueEstimate = $("#value-estimate-storage").val();
+        console.log("Got valueEstimate from #value-estimate-storage: " + valueEstimate);
+        console.log("Printing here?!");
+
+        let addressSend = $("#address-storage").val();
+        console.log("Got addressSend from #address-storage: " + addressSend);
+
         if ((valueEstimate === "" || valueEstimate === "$0" || valueEstimate === "$-" || typeof valueEstimate === "undefined" || !valueEstimate)) {
             console.log("Should show failure page");
             $("#failure-page").show();
