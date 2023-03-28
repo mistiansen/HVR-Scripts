@@ -643,15 +643,66 @@ const delay = ms => new Promise(res => setTimeout(res, ms));
 //     })
 // });
 
-document.querySelectorAll('.show-report').forEach(item => {
-    item.addEventListener('click', event => {
-        $("#visitor-info-page").hide();
-        let valueEstimate = $("#value-estimate-storage").val();
-        console.log("Got valueEstimate from #value-estimate-storage: " + valueEstimate);
-        console.log("Printing here?!");
+// document.querySelectorAll('.show-report').forEach(item => {
+//     item.addEventListener('click', event => {
+//         $("#visitor-info-page").hide();
+//         let valueEstimate = $("#value-estimate-storage").val();
+//         console.log("Got valueEstimate from #value-estimate-storage: " + valueEstimate);
+//         console.log("Printing here?!");
 
-        let addressSend = $("#address-storage").val();
-        console.log("Got addressSend from #address-storage: " + addressSend);
+//         let addressSend = $("#address-storage").val();
+//         console.log("Got addressSend from #address-storage: " + addressSend);
+//         if ((valueEstimate === "" || valueEstimate === "$0" || valueEstimate === "$-" || typeof valueEstimate === "undefined" || !valueEstimate)) {
+//             console.log("Should show failure page");
+//             $("#failure-page").show();
+//             $('#failure-loader').css('display', 'flex'); // replacing typical "$("#success-loader").show();" ; alternative may be to always show it with 'flex' in webflow then just do the .hide() step below
+//             setTimeout(function () { $("#failure-loader").hide(); }, 3000);
+//             // $("#just-calendly").show();
+//             // $('#home-animation-loader').css('display', 'flex'); // replacing typical "$("#success-loader").show();" ; alternative may be to always show it with 'flex' in webflow then just do the .hide() step below
+//             // setTimeout(function () { $("#home-animation-loader").hide(); }, 3000);
+
+//             // let sessionIdSend = $("#session-id-storage").val(); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
+//             // $("#session-id-failure-page").attr("value", sessionIdSend); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)            
+//             $("#address-failure-page").attr("value", addressSend); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
+//         } else {
+//             $("#success-page").show();
+//             $('#success-loader').css('display', 'flex'); // replacing typical "$("#success-loader").show();" ; alternative may be to always show it with 'flex' in webflow then just do the .hide() step below
+//             setTimeout(function () { $("#success-loader").hide(); }, 3000);
+//             $(".value-div").show();
+
+//             // TOOK THE BELOW OUT OF submitSellerDetails()
+//             $("#address-appointment").attr("value", addressSend); // for the form submission(s); potentially move down to unit submit section and send "unitAddress"
+//             $("#address-virtual-appointment").attr("value", addressSend);
+
+//             // // Send off session update
+//             // let sessionInfo = getCurrentSessionInfo();
+//             // sessionInfo["finished"] = true;
+//             // $("#finished").attr("value", true);
+//             // updateSession(sessionInfo);
+//         }
+//         // Changed 03/28/2023 - ALWAYS send off session update
+//         let sessionInfo = getCurrentSessionInfo();
+//         sessionInfo["finished"] = true;
+//         $("#finished").attr("value", true);
+//         updateSession(sessionInfo);
+//     });
+// });
+
+document.getElementById("contact-submit-btn").addEventListener('click', (event) => {
+    $("#visitor-info-page").hide();
+    let valueEstimate = $("#value-estimate-storage").val();
+    console.log("Got valueEstimate from #value-estimate-storage: " + valueEstimate);
+    console.log("Printing here?!");
+
+    let addressSend = $("#address-storage").val();
+    console.log("Got addressSend from #address-storage: " + addressSend);
+
+    let nameInput = $("#name-input").val();
+    let phoneInput = $("#phone-input").val();
+    if ((nameInput == null || nameInput == "") || (phoneInput == null || phoneInput == "")) {
+        console.log('They did not provide details');
+        $("#fields-required-warning").show();
+    } else {
         if ((valueEstimate === "" || valueEstimate === "$0" || valueEstimate === "$-" || typeof valueEstimate === "undefined" || !valueEstimate)) {
             console.log("Should show failure page");
             $("#failure-page").show();
@@ -669,18 +720,13 @@ document.querySelectorAll('.show-report').forEach(item => {
             $('#success-loader').css('display', 'flex'); // replacing typical "$("#success-loader").show();" ; alternative may be to always show it with 'flex' in webflow then just do the .hide() step below
             setTimeout(function () { $("#success-loader").hide(); }, 3000);
             $(".value-div").show();
-
-            // TOOK THE BELOW OUT OF submitSellerDetails()
-            $("#address-appointment").attr("value", addressSend); // for the form submission(s); potentially move down to unit submit section and send "unitAddress"
-            $("#address-virtual-appointment").attr("value", addressSend);
-
-            // Send off session update
-            let sessionInfo = getCurrentSessionInfo();
-            sessionInfo["finished"] = true;
-            $("#finished").attr("value", true);
-            updateSession(sessionInfo);
         }
-    })
+        // Changed 03/28/2023 - ALWAYS send off session update
+        let sessionInfo = getCurrentSessionInfo();
+        sessionInfo["finished"] = true;
+        $("#finished").attr("value", true);
+        updateSession(sessionInfo);
+    }
 });
 
 // // DO THIS IS IF WANT TO SUBMIT ON SHOW REPORT
