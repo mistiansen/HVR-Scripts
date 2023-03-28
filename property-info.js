@@ -63,17 +63,17 @@ function parseValuationResult(result) {
     } catch (error) {
         console.log(error);
         $("#failed-property-pull").attr("value", "true"); // NEW - ADDED 12-29-2022 to set and send with forms (e.g., request detailed report form)        
-        $(".offer-header").html("We were unable to pull your value report");
-        $(".value-estimate").html("$-");
-        $(".value-estimate-min").html("$-");
-        $(".value-estimate-max").html("$-");
-        $(".confidence-score").html(0);
-        $(".value-estimate").val("$-");
-        $(".value-estimate-min").val("$-");
-        $(".value-estimate-max").val("$-");
-        $(".confidence-score").val(0);
-        $("#offer-explanation").hide();
-        $("#schedule-walkthrough").hide();
+        // $(".offer-header").html("We were unable to pull your value report");
+        // $(".value-estimate").html("$-");
+        // $(".value-estimate-min").html("$-");
+        // $(".value-estimate-max").html("$-");
+        // $(".confidence-score").html(0);
+        // $(".value-estimate").val("$-");
+        // $(".value-estimate-min").val("$-");
+        // $(".value-estimate-max").val("$-");
+        // $(".confidence-score").val(0);
+        // $("#offer-explanation").hide();
+        // $("#schedule-walkthrough").hide();
     }
 }
 
