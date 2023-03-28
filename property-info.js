@@ -654,12 +654,12 @@ document.querySelectorAll('.show-report').forEach(item => {
         console.log("Got addressSend from #address-storage: " + addressSend);
         if ((valueEstimate === "" || valueEstimate === "$0" || valueEstimate === "$-" || typeof valueEstimate === "undefined" || !valueEstimate)) {
             console.log("Should show failure page");
-            // $("#failure-page").show();
-            // $('#failure-loader').css('display', 'flex'); // replacing typical "$("#success-loader").show();" ; alternative may be to always show it with 'flex' in webflow then just do the .hide() step below
-            // setTimeout(function () { $("#failure-loader").hide(); }, 3000);
-            $("#just-calendly").show();
-            $('#home-animation-loader').css('display', 'flex'); // replacing typical "$("#success-loader").show();" ; alternative may be to always show it with 'flex' in webflow then just do the .hide() step below
-            setTimeout(function () { $("#home-animation-loader").hide(); }, 3000);
+            $("#failure-page").show();
+            $('#failure-loader').css('display', 'flex'); // replacing typical "$("#success-loader").show();" ; alternative may be to always show it with 'flex' in webflow then just do the .hide() step below
+            setTimeout(function () { $("#failure-loader").hide(); }, 3000);
+            // $("#just-calendly").show();
+            // $('#home-animation-loader').css('display', 'flex'); // replacing typical "$("#success-loader").show();" ; alternative may be to always show it with 'flex' in webflow then just do the .hide() step below
+            // setTimeout(function () { $("#home-animation-loader").hide(); }, 3000);
 
             // let sessionIdSend = $("#session-id-storage").val(); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
             // $("#session-id-failure-page").attr("value", sessionIdSend); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)            
