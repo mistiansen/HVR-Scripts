@@ -577,71 +577,71 @@ function checkSellerDetails(name) {
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
-// NEW - ADDED 12-28-2022 to jump to failure page
-document.querySelectorAll('.selling-timeframe-btn').forEach(item => {
-    // item.addEventListener('click', event => {
-    item.addEventListener('click', async () => {
-        console.log('JUST CLICKED SELLING TIMEFRAME!');
-        let contactInfoRequired = $("#contact-required").val();
-        console.log('We found this contactInfoRequired: ' + contactInfoRequired);
-        if (contactInfoRequired == "false" || !contactInfoRequired) {
-            console.log('Will hide the visitor info page');
-            $("#visitor-info-page").hide();
-        }
+// // NEW - ADDED 12-28-2022 to jump to failure page
+// document.querySelectorAll('.selling-timeframe-btn').forEach(item => {
+//     // item.addEventListener('click', event => {
+//     item.addEventListener('click', async () => {
+//         console.log('JUST CLICKED SELLING TIMEFRAME!');
+//         let contactInfoRequired = $("#contact-required").val();
+//         console.log('We found this contactInfoRequired: ' + contactInfoRequired);
+//         if (contactInfoRequired == "false" || !contactInfoRequired) {
+//             console.log('Will hide the visitor info page');
+//             $("#visitor-info-page").hide();
+//         }
 
-        let failedPropertyInfo = $("#failed-property-pull").val();
-        console.log("Failed property pull from #failed-property-pull: " + failedPropertyInfo);
+//         let failedPropertyInfo = $("#failed-property-pull").val();
+//         console.log("Failed property pull from #failed-property-pull: " + failedPropertyInfo);
 
-        let valueEstimate = $("#value-estimate-storage").val();
-        console.log("Got valueEstimate from #value-estimate-storage: " + valueEstimate);
-        console.log("Printing here?!");
+//         let valueEstimate = $("#value-estimate-storage").val();
+//         console.log("Got valueEstimate from #value-estimate-storage: " + valueEstimate);
+//         console.log("Printing here?!");
 
-        // TODO - set a retry counter (?)
-        if (!failedPropertyInfo && (valueEstimate === "" || valueEstimate === "$0" || valueEstimate === "$-" || typeof valueEstimate === "undefined" || !valueEstimate)) {
-            console.log('Waiting 2 secs');
-            await delay(2000);
-            failedPropertyInfo = $("#failed-property-pull").val();
-            console.log("Waited 2 secs then pulled from #failed-property-pull: " + failedPropertyInfo);
-        }
+//         // TODO - set a retry counter (?)
+//         if (!failedPropertyInfo && (valueEstimate === "" || valueEstimate === "$0" || valueEstimate === "$-" || typeof valueEstimate === "undefined" || !valueEstimate)) {
+//             console.log('Waiting 2 secs');
+//             await delay(2000);
+//             failedPropertyInfo = $("#failed-property-pull").val();
+//             console.log("Waited 2 secs then pulled from #failed-property-pull: " + failedPropertyInfo);
+//         }
 
-        if (failedPropertyInfo) {
-            console.log("Should show failure page");
+//         if (failedPropertyInfo) {
+//             console.log("Should show failure page");
 
-            let addressSend = $("#address-storage").val();
-            console.log("Got addressSend from #address-storage: " + addressSend);
-            $("#address-failure-page").attr("value", addressSend); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
+//             let addressSend = $("#address-storage").val();
+//             console.log("Got addressSend from #address-storage: " + addressSend);
+//             $("#address-failure-page").attr("value", addressSend); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
 
-            $("#failure-page").show();
-            $('#failure-loader').css('display', 'flex'); // replacing typical "$("#success-loader").show();" ; alternative may be to always show it with 'flex' in webflow then just do the .hide() step below
-            setTimeout(function () { $("#failure-loader").hide(); }, 3000);
+//             $("#failure-page").show();
+//             $('#failure-loader').css('display', 'flex'); // replacing typical "$("#success-loader").show();" ; alternative may be to always show it with 'flex' in webflow then just do the .hide() step below
+//             setTimeout(function () { $("#failure-loader").hide(); }, 3000);
 
-            await delay(1600); // NOTE - 3/10/2023 - why was this here? to check again? NO it's because need to wait for the default interaction to finish showing the visitor info page
-            $("#visitor-info-page").hide();
-            console.log("Should have just hidden visitor info page");
+//             // await delay(1600); // NOTE - 3/10/2023 - why was this here? to check again? NO it's because need to wait for the default interaction to finish showing the visitor info page
+//             // $("#visitor-info-page").hide();
+//             // console.log("Should have just hidden visitor info page");
 
-            // NOTE - ADDED 3/10/2023 - Send off session update to finish here because we are done
-            let sessionInfo = getCurrentSessionInfo();
-            sessionInfo["finished"] = true;
-            $("#finished").attr("value", true);
-            updateSession(sessionInfo);
-        } else if (contactInfoRequired == "false" || !contactInfoRequired) {
-            $("#success-page").show();
-            $('#success-loader').css('display', 'flex'); // replacing typical "$("#success-loader").show();" ; alternative may be to always show it with 'flex' in webflow then just do the .hide() step below
-            setTimeout(function () { $("#success-loader").hide(); }, 3000);
-            $(".value-div").show();
+//             // NOTE - ADDED 3/10/2023 - Send off session update to finish here because we are done
+//             let sessionInfo = getCurrentSessionInfo();
+//             sessionInfo["finished"] = true;
+//             $("#finished").attr("value", true);
+//             updateSession(sessionInfo);
+//         } else if (contactInfoRequired == "false" || !contactInfoRequired) {
+//             $("#success-page").show();
+//             $('#success-loader').css('display', 'flex'); // replacing typical "$("#success-loader").show();" ; alternative may be to always show it with 'flex' in webflow then just do the .hide() step below
+//             setTimeout(function () { $("#success-loader").hide(); }, 3000);
+//             $(".value-div").show();
 
-            // TOOK THE BELOW OUT OF submitSellerDetails()
-            $("#address-appointment").attr("value", addressSend); // for the form submission(s); potentially move down to unit submit section and send "unitAddress"
-            $("#address-virtual-appointment").attr("value", addressSend);
+//             // TOOK THE BELOW OUT OF submitSellerDetails()
+//             $("#address-appointment").attr("value", addressSend); // for the form submission(s); potentially move down to unit submit section and send "unitAddress"
+//             $("#address-virtual-appointment").attr("value", addressSend);
 
-            // Send off session update
-            let sessionInfo = getCurrentSessionInfo();
-            sessionInfo["finished"] = true;
-            $("#finished").attr("value", true);
-            updateSession(sessionInfo);
-        }
-    })
-});
+//             // Send off session update
+//             let sessionInfo = getCurrentSessionInfo();
+//             sessionInfo["finished"] = true;
+//             $("#finished").attr("value", true);
+//             updateSession(sessionInfo);
+//         }
+//     })
+// });
 
 document.querySelectorAll('.show-report').forEach(item => {
     item.addEventListener('click', event => {
@@ -654,9 +654,12 @@ document.querySelectorAll('.show-report').forEach(item => {
         console.log("Got addressSend from #address-storage: " + addressSend);
         if ((valueEstimate === "" || valueEstimate === "$0" || valueEstimate === "$-" || typeof valueEstimate === "undefined" || !valueEstimate)) {
             console.log("Should show failure page");
-            $("#failure-page").show();
-            $('#failure-loader').css('display', 'flex'); // replacing typical "$("#success-loader").show();" ; alternative may be to always show it with 'flex' in webflow then just do the .hide() step below
-            setTimeout(function () { $("#failure-loader").hide(); }, 3000);
+            // $("#failure-page").show();
+            // $('#failure-loader').css('display', 'flex'); // replacing typical "$("#success-loader").show();" ; alternative may be to always show it with 'flex' in webflow then just do the .hide() step below
+            // setTimeout(function () { $("#failure-loader").hide(); }, 3000);
+            $("#just-calendly").show();
+            $('#home-animation-loader').css('display', 'flex'); // replacing typical "$("#success-loader").show();" ; alternative may be to always show it with 'flex' in webflow then just do the .hide() step below
+            setTimeout(function () { $("#home-animation-loader").hide(); }, 3000);
 
             // let sessionIdSend = $("#session-id-storage").val(); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
             // $("#session-id-failure-page").attr("value", sessionIdSend); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)            
