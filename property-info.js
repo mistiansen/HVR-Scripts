@@ -279,59 +279,59 @@ function validateAddress(address, startSession) {
     });
 }
 
-$(document).ready(function () {
-    let queryString = window.location.search;
-    let params = new URLSearchParams(queryString);
-    let site = params.get("site");
-    let address = params.get("address");
-    let agentId = params.get("agent");
-    let contactRequired = params.get("contactRequired");
+// $(document).ready(function () {
+//     let queryString = window.location.search;
+//     let params = new URLSearchParams(queryString);
+//     let site = params.get("site");
+//     let address = params.get("address");
+//     let agentId = params.get("agent");
+//     let contactRequired = params.get("contactRequired");
 
-    console.log('Pulled address from queryString: ' + address);
-    console.log('Pulled source site from queryString: ' + site);
-    console.log('Pulled agent from queryString: ' + agentId);
-    console.log('Pulled contactInfoRequired from queryString: ' + contactRequired);
+//     console.log('Pulled address from queryString: ' + address);
+//     console.log('Pulled source site from queryString: ' + site);
+//     console.log('Pulled agent from queryString: ' + agentId);
+//     console.log('Pulled contactInfoRequired from queryString: ' + contactRequired);
 
-    if (typeof contactRequired == "undefined") {
-        contactRequired = true;
-    }
-    $("#contact-required").attr("value", contactRequired);
+//     if (typeof contactRequired == "undefined") {
+//         contactRequired = true;
+//     }
+//     $("#contact-required").attr("value", contactRequired);
 
-    if (!site || !address || !agentId) {
-        let routeTo = "https://my.homevalue.report";
-        // let queryString = '?address=' + encodeURIComponent(address) + '&agent=' + encodeURIComponent(agentId) + '&site=' + encodeURIComponent(site);
-        // routeTo = routeTo + queryString;
-        console.log('Routing to URL ' + routeTo);
-        location.href = routeTo;
-    }
+//     if (!site || !address || !agentId) {
+//         let routeTo = "https://my.homevalue.report";
+//         // let queryString = '?address=' + encodeURIComponent(address) + '&agent=' + encodeURIComponent(agentId) + '&site=' + encodeURIComponent(site);
+//         // routeTo = routeTo + queryString;
+//         console.log('Routing to URL ' + routeTo);
+//         location.href = routeTo;
+//     }
 
-    // history.replaceState({}, null, "/value");  
+//     // history.replaceState({}, null, "/value");  
 
-    // IT'S possible that we should query with the source site name here to ensure safety
-    $("#agent-id-storage").attr("value", agentId);
-    console.log(agentId);
+//     // IT'S possible that we should query with the source site name here to ensure safety
+//     $("#agent-id-storage").attr("value", agentId);
+//     console.log(agentId);
 
-    // UPDATE ADDRESS DISPLAY AND STORAGE FIELDS
-    $(".address-display").html(address);
-    $("#address-storage").attr("value", address); // NOTE - consider removing
-    $("#address-failure-page").attr("value", address); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
-    document.getElementById("address-failure-page").value = address; // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
-    // $('.address-storage-class').attr("value", address); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
-    // $('.address-storage-class').val(address); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
-    // $('.address-storage-class input').val(address); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
+//     // UPDATE ADDRESS DISPLAY AND STORAGE FIELDS
+//     $(".address-display").html(address);
+//     $("#address-storage").attr("value", address); // NOTE - consider removing
+//     $("#address-failure-page").attr("value", address); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
+//     document.getElementById("address-failure-page").value = address; // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
+//     // $('.address-storage-class').attr("value", address); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
+//     // $('.address-storage-class').val(address); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
+//     // $('.address-storage-class input').val(address); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
 
-    // STORE THE SOURCE USER CAME FROM
-    $("#domain-storage").attr("value", site); // get with $("#domain-storage").val();
+//     // STORE THE SOURCE USER CAME FROM
+//     $("#domain-storage").attr("value", site); // get with $("#domain-storage").val();
 
-    // HIDE UNUSED LOADERS
-    $("#market-analysis-loader").show();
-    // $('#updating-home-details-loader').removeClass('hide');
-    $('#updating-home-details-loader').hide();
+//     // HIDE UNUSED LOADERS
+//     $("#market-analysis-loader").show();
+//     // $('#updating-home-details-loader').removeClass('hide');
+//     $('#updating-home-details-loader').hide();
 
-    validateAddress(address, true);
-    history.replaceState({}, null, "value");
-    setTimeout(function () { $("#market-analysis-loader").hide(); }, 2500);
-});
+//     validateAddress(address, true);
+//     history.replaceState({}, null, "value");
+//     setTimeout(function () { $("#market-analysis-loader").hide(); }, 2500);
+// });
 
 document.getElementById("no-unit-btn").addEventListener('click', (event) => {
     console.log('Just clicked no unit btn');
@@ -575,7 +575,7 @@ function checkSellerDetails(name) {
     return checkedValue;
 }
 
-const delay = ms => new Promise(res => setTimeout(res, ms));
+// const delay = ms => new Promise(res => setTimeout(res, ms));
 
 // // NEW - ADDED 12-28-2022 to jump to failure page
 // document.querySelectorAll('.selling-timeframe-btn').forEach(item => {
