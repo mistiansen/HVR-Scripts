@@ -720,7 +720,7 @@ document.getElementById("contact-submit-btn").addEventListener('click', async (e
         } else {
             $("#success-page").show();
             $('#success-loader').css('display', 'flex'); // replacing typical "$("#success-loader").show();" ; alternative may be to always show it with 'flex' in webflow then just do the .hide() step below
-            setTimeout(function () { $("#success-page-estimates").show(); }, 3100);
+            setTimeout(function () { $("#success-page-estimates").show(); }, 3000);
             setTimeout(function () { $("#success-loader").hide(); }, 3000);
             // $(".value-div").show();
 
