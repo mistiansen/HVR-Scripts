@@ -689,6 +689,7 @@ function checkSellerDetails(name) {
 // });
 
 document.getElementById("contact-submit-btn").addEventListener('click', (event) => {
+    console.log('clicked contact submit');
     let nameInput = $("#name-input").val();
     let phoneInput = $("#phone-input").val();
     if ((nameInput == null || nameInput == "") || (phoneInput == null || phoneInput == "")) {
@@ -720,7 +721,8 @@ document.getElementById("contact-submit-btn").addEventListener('click', (event) 
             $("#success-page").show();
             $('#success-loader').css('display', 'flex'); // replacing typical "$("#success-loader").show();" ; alternative may be to always show it with 'flex' in webflow then just do the .hide() step below
             setTimeout(function () { $("#success-loader").hide(); }, 3000);
-            $(".value-div").show();
+            // $(".value-div").show();
+            $("#success-page-estimates").hide();
         }
         // Changed 03/28/2023 - ALWAYS send off session update
         let sessionInfo = getCurrentSessionInfo();
