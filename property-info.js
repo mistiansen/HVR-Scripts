@@ -688,7 +688,7 @@ function checkSellerDetails(name) {
 //     });
 // });
 
-document.getElementById("contact-submit-btn").addEventListener('click', (event) => {
+document.getElementById("contact-submit-btn").addEventListener('click', async (event) => {
     console.log('clicked contact submit');
     let nameInput = $("#name-input").val();
     let phoneInput = $("#phone-input").val();
@@ -720,9 +720,10 @@ document.getElementById("contact-submit-btn").addEventListener('click', (event) 
         } else {
             $("#success-page").show();
             $('#success-loader').css('display', 'flex'); // replacing typical "$("#success-loader").show();" ; alternative may be to always show it with 'flex' in webflow then just do the .hide() step below
+            setTimeout(function () { $("#success-page-estimates").show(); }, 3100);
             setTimeout(function () { $("#success-loader").hide(); }, 3000);
             // $(".value-div").show();
-            $("#success-page-estimates").show(); // added 4/7/2023 to support the Agent Fixup estimate display
+
         }
         // Changed 03/28/2023 - ALWAYS send off session update
         let sessionInfo = getCurrentSessionInfo();
