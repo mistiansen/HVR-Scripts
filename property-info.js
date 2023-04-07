@@ -722,7 +722,7 @@ document.getElementById("contact-submit-btn").addEventListener('click', (event) 
             $('#success-loader').css('display', 'flex'); // replacing typical "$("#success-loader").show();" ; alternative may be to always show it with 'flex' in webflow then just do the .hide() step below
             setTimeout(function () { $("#success-loader").hide(); }, 3000);
             // $(".value-div").show();
-            $("#success-page-estimates").hide();
+            $("#success-page-estimates").show(); // added 4/7/2023 to support the Agent Fixup estimate display
         }
         // Changed 03/28/2023 - ALWAYS send off session update
         let sessionInfo = getCurrentSessionInfo();
