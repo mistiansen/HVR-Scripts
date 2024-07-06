@@ -78,6 +78,31 @@ function parseValuationResult(result) {
     }
 }
 
+function parsePropertyDescription(result) {
+    try {
+        // const descriptionElement = document.querySelector('.property-description-text');
+        let description;
+        if (result && result.Property && result.Property.propertyDescription) {
+            description = result.Property.propertyDescription.description;
+        }
+        if (description === undefined) {
+            // descriptionElement.style.display = 'none';
+            console.log("No property description available");
+            $(".property-description-text").hide();
+        } else {
+            // descriptionElement.textContent = description;
+            // descriptionElement.style.display = 'block'; // or 'inline', depending on your CSS            
+            $(".property-description-text").show();
+            $(".property-description-text").html(adjustedEstimate);
+            $(".property-description-text").val(adjustedEstimate);            
+        }        
+    } catch (error) {
+        console.log(error);
+        $(".property-description-text").hide();
+    }
+}
+   
+
 // function pullPropertyInfo(address, street, city, state, zip, agentId, domain) {
 function pullPropertyInfo(address, agentId, domain) {
 
@@ -114,6 +139,9 @@ function pullPropertyInfo(address, agentId, domain) {
         // $('.session-id-storage-class').attr("value", sessionId); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
         // $('.session-id-storage-class').html(sessionId); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
         // $(".session-id-storage-class").children().val(sessionId); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
+
+        parsePropertyDescription(result);
+
         console.log('Pulled this property: ' + property);
         console.log('Pulled this sessionId: ' + sessionId);
         return parseValuationResult(property);
