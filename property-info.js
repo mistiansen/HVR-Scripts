@@ -756,3 +756,40 @@ document.getElementById("contact-submit-btn").addEventListener('click', async (e
 //         updateSession(sessionInfo);
 //     });
 // }
+
+
+$(document).ready(function () {
+    let queryString = window.location.search;
+    let params = new URLSearchParams(queryString);
+    let address = params.get("address");
+    let agentId = params.get("agent");
+
+    console.log('Pulled address from queryString: ' + address);
+    console.log('Pulled agent from queryString: ' + agentId);
+
+    if (typeof contactRequired == "undefined") {
+        contactRequired = true;
+    }
+    $("#contact-required").attr("value", contactRequired);
+
+    // history.replaceState({}, null, "/value");  
+
+    // IT'S possible that we should query with the source site name here to ensure safety
+    $("#agent-id-storage").attr("value", agentId);
+    console.log(agentId);
+
+    // UPDATE ADDRESS DISPLAY AND STORAGE FIELDS
+    $(".address-display").html(address);
+    $("#address-storage").attr("value", address); // NOTE - consider removing
+    $("#address-failure-page").attr("value", address); // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
+    document.getElementById("address-failure-page").value = address; // NEW - ADDED 12-28-2022 to set and send with forms (e.g., request detailed report form)
+
+    // HIDE UNUSED LOADERS
+    $("#market-analysis-loader").show();
+    // $('#updating-home-details-loader').removeClass('hide');
+    $('#updating-home-details-loader').hide();
+
+    validateAddress(address, true);
+    history.replaceState({}, null, "value");
+    setTimeout(function () { $("#market-analysis-loader").hide(); }, 2500);
+});
