@@ -84,6 +84,7 @@ function parsePropertyDescription(result) {
         let description;
         if (result && result.Property && result.Property.propertyDescription) {
             description = result.Property.propertyDescription.description;
+            console.log('Got property description: ' + description);
         }
         if (description === undefined) {
             // descriptionElement.style.display = 'none';
@@ -93,8 +94,8 @@ function parsePropertyDescription(result) {
             // descriptionElement.textContent = description;
             // descriptionElement.style.display = 'block'; // or 'inline', depending on your CSS            
             $(".property-description-text").show();
-            $(".property-description-text").html(adjustedEstimate);
-            $(".property-description-text").val(adjustedEstimate);            
+            $(".property-description-text").html(description);
+            $(".property-description-text").val(description);            
         }        
     } catch (error) {
         console.log(error);
