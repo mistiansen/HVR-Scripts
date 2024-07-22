@@ -600,7 +600,8 @@ function checkSellerDetails(name) {
     if (checkedRadio != null) {
         checkedValue = checkedRadio.value
     } else {
-        checkedValue = "None given";
+        // checkedValue = "None given";
+        checkedValue = "";
     }
     return checkedValue;
 }
