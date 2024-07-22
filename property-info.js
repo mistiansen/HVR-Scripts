@@ -581,7 +581,7 @@ function getCurrentSessionInfo() {
         "validatedZip": validatedZip, // for the skiptrace if property info pull fails                
     }
 
-    let checkRadioNames = ["Relationship-to-Home", "Considering-Selling"];
+    let checkRadioNames = ["Relationship-to-Home", "Considering-Selling", "Buyer-Questions", "Agent-Questions"];
     for (const checkRadioName of checkRadioNames) {
         console.log('Checking radio selections for ' + checkRadioName);
         let sellerDetails = checkSellerDetails(checkRadioName);
